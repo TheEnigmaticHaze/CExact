@@ -1,2 +1,2 @@
 # CExact
-A c library for abstracting some mathematical concepts to do exact math
+A c header for abstracting some mathematical concepts to do exact math

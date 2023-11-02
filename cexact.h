@@ -5,7 +5,7 @@ typedef enum
 {
   EquationElementIntegerLiteral,
   EquationElementDecimalLiteral,
-  EquationElementIntegerFraction,
+  EquationElementIntegerFractionLiteral,
   EquationElementEquation,
   EquationElementEquationFraction,
   EquationElementVariable,
@@ -70,7 +70,7 @@ IntegerFraction *integerFractionCreate(int numerator, int denominator)
 
   IntegerFraction *fraction;
   fraction = (IntegerFraction *)malloc(sizeof(IntegerFraction));
-  fraction->header = equationElementHeaderCreate(EquationElementIntegerFraction);
+  fraction->header = equationElementHeaderCreate(EquationElementIntegerFractionLiteral);
   fraction->numerator = numerator;
   fraction->denominator = denominator;
 

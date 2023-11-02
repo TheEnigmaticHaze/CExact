@@ -1,13 +1,36 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+typedef enum
+{
+  EquationElementIntegerLiteral,
+  EquationElementDecimalLiteral,
+  EquationElementIntegerFraction,
+  EquationElementEquation,
+  EquationElementEquationFraction,
+  EquationElementVariable
+} EquationElement;
+
 typedef struct
 {
+  EquationElement equationElementType;
+} EquationElementHeader;
+
+EquationElementHeader equationElementHeaderCreate(EquationElement element)
+{
+  EquationElementHeader header;
+  header.equationElementType = element;
+  return header;
+}
+
+typedef struct
+{
+  EquationElementHeader header;
   int numerator;
   int denominator;
-} Fraction;
+} IntegerFraction;
 
-Fraction *fractionCreate(int numerator, int denominator)
+IntegerFraction *integerFractionCreate(int numerator, int denominator)
 {
   if(denominator < 0)
   {
@@ -29,20 +52,48 @@ Fraction *fractionCreate(int numerator, int denominator)
     }
   }
 
-  Fraction *fraction;
-  fraction = (Fraction *)malloc(sizeof(Fraction));
+  IntegerFraction *fraction;
+  fraction = (IntegerFraction *)malloc(sizeof(IntegerFraction));
+  fraction->header = equationElementHeaderCreate(EquationElementIntegerFraction);
   fraction->numerator = numerator;
   fraction->denominator = denominator;
 
   return fraction;
 }
 
-Fraction *fractionAdd(Fraction *a, Fraction *b)
+IntegerFraction *integerFractionAdd(IntegerFraction *a, IntegerFraction *b)
 {
   int newDenominator = a->denominator * b->denominator;
   int newNumerator = a->numerator * b->denominator + b->numerator * a->denominator;
-  return fractionCreate(newNumerator, newDenominator);
+  return integerFractionCreate(newNumerator, newDenominator);
 }
+
+IntegerFraction *integerFractionMultiply(IntegerFraction *a, IntegerFraction *b)
+{
+  int newNumerator = a->numerator * b->numerator;
+  int newDenominator = a->denominator * b->denominator;
+  return integerFractionCreate(newNumerator, newDenominator);
+}
+
+float integerFractionToFloat(IntegerFraction a)
+{
+  return (float)a.numerator / (float)a.denominator;
+}
+
+
+typedef struct
+{
+  EquationElementHeader header;
+  EquationElementHeader** numberHeaders;
+  int lengthOfEquation;
+} Equation;
+
+typedef struct
+{
+  EquationElementHeader header;
+  EquationElementHeader numerator;
+  EquationElementHeader denominator;
+} EquationFraction;
 
 int *primeFactorize(int k, int *length)
 {

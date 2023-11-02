@@ -8,8 +8,24 @@ typedef enum
   EquationElementIntegerFraction,
   EquationElementEquation,
   EquationElementEquationFraction,
-  EquationElementVariable
+  EquationElementVariable,
+  EquationElementOperation
 } EquationElement;
+
+typedef enum
+{
+  OperationAdd,
+  OperationSubtract,
+  OperationMultiply,
+  OperationDivide,
+  OperationPower
+} BinaryOperation;
+
+typedef struct
+{
+  EquationElementHeader header;
+  BinaryOperation operation;
+} BinaryOperationElement;
 
 typedef struct
 {
@@ -84,16 +100,11 @@ float integerFractionToFloat(IntegerFraction a)
 typedef struct
 {
   EquationElementHeader header;
-  EquationElementHeader** numberHeaders;
+  EquationElementHeader** equationHeaders;
   int lengthOfEquation;
 } Equation;
 
-typedef struct
-{
-  EquationElementHeader header;
-  EquationElementHeader numerator;
-  EquationElementHeader denominator;
-} EquationFraction;
+Equation *equationCreate(char *string, int stringLength);
 
 int *primeFactorize(int k, int *length)
 {

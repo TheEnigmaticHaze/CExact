@@ -4,13 +4,33 @@
 typedef enum
 {
   EquationElementIntegerLiteral,
-  EquationElementDecimalLiteral,
+  EquationElementConstLiteral,
   EquationElementIntegerFractionLiteral,
+  EquationElementRadicalLiteral,
   EquationElementEquation,
-  EquationElementEquationFraction,
   EquationElementVariable,
-  EquationElementOperation
+  EquationElementOperation,
+  EquationElementFunction
 } EquationElement;
+
+typedef struct
+{
+  EquationElement equationElementType;
+} EquationElementHeader;
+
+EquationElementHeader equationElementHeaderCreate(EquationElement element)
+{
+  EquationElementHeader header;
+  header.equationElementType = element;
+  return header;
+}
+
+typedef enum
+{
+  EquationElementConstPi,
+  EquationElementConstE,
+  EquationElementConstLog2,
+} EquationElementConst;
 
 typedef enum
 {
@@ -27,16 +47,13 @@ typedef struct
   BinaryOperation operation;
 } BinaryOperationElement;
 
-typedef struct
+BinaryOperationElement *BinaryOperationElementCreate(BinaryOperation operation)
 {
-  EquationElement equationElementType;
-} EquationElementHeader;
-
-EquationElementHeader equationElementHeaderCreate(EquationElement element)
-{
-  EquationElementHeader header;
-  header.equationElementType = element;
-  return header;
+  BinaryOperationElement *newBinaryOperationElement;
+  newBinaryOperationElement = (BinaryOperationElement *)malloc(sizeof(BinaryOperationElement));
+  newBinaryOperationElement->header = equationElementHeaderCreate(EquationElementOperation);
+  newBinaryOperationElement->operation = operation;
+  return newBinaryOperationElement;
 }
 
 typedef struct
@@ -100,11 +117,29 @@ float integerFractionToFloat(IntegerFraction a)
 typedef struct
 {
   EquationElementHeader header;
-  EquationElementHeader** equationHeaders;
+  EquationElementHeader **equationHeaders;
   int lengthOfEquation;
 } Equation;
 
-Equation *equationCreate(char *string, int stringLength);
+Equation *equationCreate(char *string, int stringLength)
+{
+  Equation *newEquation;
+  newEquation = (Equation *)malloc(sizeof(Equation));
+  int equationLength = 0;
+
+  EquationElementHeader **headers;
+  headers = (EquationElementHeader **)malloc(sizeof(EquationElementHeader **) * stringLength);
+
+  int i;
+  while(i < stringLength)
+  {
+    
+  }
+
+  newEquation->header = equationElementHeaderCreate(EquationElementEquation);
+  newEquation->equationHeaders = headers;
+  return newEquation;
+}
 
 int *primeFactorize(int k, int *length)
 {

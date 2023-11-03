@@ -25,12 +25,53 @@ EquationElementHeader equationElementHeaderCreate(EquationElement element)
   return header;
 }
 
+typedef struct
+{
+  EquationElementHeader header;
+  int value;
+} IntegerLiteral;
+
+IntegerLiteral *IntegerCreate(int value)
+{
+  IntegerLiteral *newIntegerLiteral;
+  newIntegerLiteral = (IntegerLiteral *)malloc(sizeof(IntegerLiteral));
+  newIntegerLiteral->header = equationElementHeaderCreate(EquationElementIntegerLiteral);
+  newIntegerLiteral->value = value;
+  return newIntegerLiteral;
+}
+
+IntegerLiteral *IntegerAdd(IntegerLiteral *a, IntegerLiteral *b)
+{
+  return IntegerCreate(a->value + b->value);
+}
+
+IntegerLiteral *integerMultiply(IntegerLiteral *a, IntegerLiteral *b)
+{
+  return IntegerCreate(a->value * b->value);
+}
+
 typedef enum
 {
   EquationElementConstPi,
   EquationElementConstE,
   EquationElementConstLog2,
+  EquationElementConstLn2
 } EquationElementConst;
+
+typedef struct 
+{
+  EquationElementHeader header;
+  EquationElementConst constValue;
+} ConstLiteral;
+
+ConstLiteral *constLiteralCreate(EquationElementConst equationElementConst)
+{
+  ConstLiteral *newConstLiteral;
+  newConstLiteral = (ConstLiteral *)malloc(sizeof(ConstLiteral));
+  newConstLiteral->header = equationElementHeaderCreate(EquationElementConstLiteral);
+  newConstLiteral->constValue = equationElementConst;
+  return newConstLiteral;
+}
 
 typedef enum
 {
@@ -108,9 +149,20 @@ IntegerFraction *integerFractionMultiply(IntegerFraction *a, IntegerFraction *b)
   return integerFractionCreate(newNumerator, newDenominator);
 }
 
-float integerFractionToFloat(IntegerFraction a)
+typedef struct
 {
-  return (float)a.numerator / (float)a.denominator;
+  EquationElementHeader header;
+  int radicand;
+  int degree;
+} RadicalLiteral;
+
+RadicalLiteral *radicalLiteralCreate(int radicand, int degree)
+{
+  RadicalLiteral *newRadicalLiteral;
+  newRadicalLiteral = (RadicalLiteral *)malloc(sizeof(RadicalLiteral));
+  newRadicalLiteral->header = equationElementHeaderCreate(EquationElementRadicalLiteral);
+  newRadicalLiteral->radicand = radicand;
+  newRadicalLiteral->degree = degree;
 }
 
 
@@ -133,12 +185,23 @@ Equation *equationCreate(char *string, int stringLength)
   int i;
   while(i < stringLength)
   {
-    
+
   }
 
   newEquation->header = equationElementHeaderCreate(EquationElementEquation);
   newEquation->equationHeaders = headers;
   return newEquation;
+}
+
+void equationDestroy(Equation *equation)
+{
+  int i;
+  for(i = 0; i < equation->lengthOfEquation; i++)
+  {
+    free((equation->equationHeaders)[i]);
+  }
+  free(equation->equationHeaders);
+  free(equation);
 }
 
 int *primeFactorize(int k, int *length)

@@ -122,6 +122,36 @@ RadicalLiteral *radicalLiteralCreate(EquationElementHeader *radicand, EquationEl
   return newRadicalLiteral;
 }
 
+typedef enum
+{
+  FunctionTypeSin,
+  FunctionTypeCos,
+  FunctionTypeTan,
+  FunctionTypeCot,
+  FunctionTypeCsc,
+  FunctionTypeSec,
+
+  FunctionTypeAbs,
+  FunctionTypeMax,
+  FunctionTypeMin
+} FunctionType;
+
+typedef struct
+{
+  EquationElementHeader header;
+  int parameterCount;
+  EquationElementHeader **parameterHeaders;
+} Function;
+
+Function *functionCreate(int parameterCount, EquationElementHeader **parameterHeaders, FunctionType functionType)
+{
+  Function *newFunction;
+  newFunction = (Function *)malloc(sizeof(Function));
+  newFunction->header = equationElementHeaderCreate(EquationElementFunction);
+  newFunction->parameterCount = parameterCount;
+  newFunction->parameterHeaders = parameterHeaders;
+  return newFunction;
+}
 
 typedef struct
 {
@@ -142,7 +172,7 @@ Equation *equationCreate(char *string, int stringLength)
   int i;
   while(i < stringLength)
   {
-
+    headers = parseEquation(*string);
   }
 
   newEquation->header = equationElementHeaderCreate(EquationElementEquation);

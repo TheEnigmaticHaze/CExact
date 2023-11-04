@@ -31,23 +31,13 @@ typedef struct
   int value;
 } IntegerLiteral;
 
-IntegerLiteral *IntegerCreate(int value)
+IntegerLiteral *integerCreate(int value)
 {
   IntegerLiteral *newIntegerLiteral;
   newIntegerLiteral = (IntegerLiteral *)malloc(sizeof(IntegerLiteral));
   newIntegerLiteral->header = equationElementHeaderCreate(EquationElementIntegerLiteral);
   newIntegerLiteral->value = value;
   return newIntegerLiteral;
-}
-
-IntegerLiteral *IntegerAdd(IntegerLiteral *a, IntegerLiteral *b)
-{
-  return IntegerCreate(a->value + b->value);
-}
-
-IntegerLiteral *integerMultiply(IntegerLiteral *a, IntegerLiteral *b)
-{
-  return IntegerCreate(a->value * b->value);
 }
 
 typedef enum
@@ -88,7 +78,7 @@ typedef struct
   BinaryOperation operation;
 } BinaryOperationElement;
 
-BinaryOperationElement *BinaryOperationElementCreate(BinaryOperation operation)
+BinaryOperationElement *binaryOperationElementCreate(BinaryOperation operation)
 {
   BinaryOperationElement *newBinaryOperationElement;
   newBinaryOperationElement = (BinaryOperationElement *)malloc(sizeof(BinaryOperationElement));
@@ -100,34 +90,14 @@ BinaryOperationElement *BinaryOperationElementCreate(BinaryOperation operation)
 typedef struct
 {
   EquationElementHeader header;
-  int numerator;
-  int denominator;
-} IntegerFraction;
+  EquationElementHeader *numerator;
+  EquationElementHeader *denominator;
+} Fraction;
 
-IntegerFraction *integerFractionCreate(int numerator, int denominator)
+Fraction *fractionCreate(EquationElementHeader *numerator, EquationElementHeader *denominator)
 {
-  if(denominator < 0)
-  {
-    numerator *= -1;
-    denominator *= -1;
-  }
-
-  int i = 2;
-  while(i <= abs(numerator))
-  {
-    if(numerator % i == 0 && denominator % i == 0)
-    {
-      numerator /= i;
-      denominator /= i;
-    }
-    else
-    {
-      i++;
-    }
-  }
-
-  IntegerFraction *fraction;
-  fraction = (IntegerFraction *)malloc(sizeof(IntegerFraction));
+  Fraction *fraction;
+  fraction = (Fraction *)malloc(sizeof(Fraction));
   fraction->header = equationElementHeaderCreate(EquationElementIntegerFractionLiteral);
   fraction->numerator = numerator;
   fraction->denominator = denominator;
@@ -135,34 +105,21 @@ IntegerFraction *integerFractionCreate(int numerator, int denominator)
   return fraction;
 }
 
-IntegerFraction *integerFractionAdd(IntegerFraction *a, IntegerFraction *b)
-{
-  int newDenominator = a->denominator * b->denominator;
-  int newNumerator = a->numerator * b->denominator + b->numerator * a->denominator;
-  return integerFractionCreate(newNumerator, newDenominator);
-}
-
-IntegerFraction *integerFractionMultiply(IntegerFraction *a, IntegerFraction *b)
-{
-  int newNumerator = a->numerator * b->numerator;
-  int newDenominator = a->denominator * b->denominator;
-  return integerFractionCreate(newNumerator, newDenominator);
-}
-
 typedef struct
 {
   EquationElementHeader header;
-  int radicand;
-  int degree;
+  EquationElementHeader *radicand;
+  EquationElementHeader *degree;
 } RadicalLiteral;
 
-RadicalLiteral *radicalLiteralCreate(int radicand, int degree)
+RadicalLiteral *radicalLiteralCreate(EquationElementHeader *radicand, EquationElementHeader *degree)
 {
   RadicalLiteral *newRadicalLiteral;
   newRadicalLiteral = (RadicalLiteral *)malloc(sizeof(RadicalLiteral));
   newRadicalLiteral->header = equationElementHeaderCreate(EquationElementRadicalLiteral);
   newRadicalLiteral->radicand = radicand;
   newRadicalLiteral->degree = degree;
+  return newRadicalLiteral;
 }
 
 
@@ -232,4 +189,34 @@ int *primeFactorize(int k, int *length)
   }
 
   return primeArray;
+}
+
+Fraction *integerFractionCreate(int numerator, int denominator)
+{
+  if(denominator < 0)
+  {
+    numerator *= -1;
+    denominator *= -1;
+  }
+
+  int i = 2;
+  while(i <= abs(numerator))
+  {
+    if(numerator % i == 0 && denominator % i == 0)
+    {
+      numerator /= i;
+      denominator /= i;
+    }
+    else
+    {
+      i++;
+    }
+  }
+
+  EquationElementHeader *numeratorHeader;
+  numeratorHeader = (EquationElementHeader *)integerCreate(numerator);
+  EquationElementHeader *denominatorHeader;
+  denominatorHeader = (EquationElementHeader *)integerCreate(denominator);
+
+  return fractionCreate(numeratorHeader, denominatorHeader);
 }

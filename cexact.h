@@ -26,6 +26,7 @@ EquationElementHeader equationElementHeaderCreate(EquationElement element)
   return header;
 }
 
+
 typedef struct
 {
   EquationElementHeader header;
@@ -47,6 +48,7 @@ typedef enum
   EquationElementConstE,
 } EquationElementConst;
 
+
 typedef struct 
 {
   EquationElementHeader header;
@@ -61,6 +63,7 @@ ConstLiteral *constLiteralCreate(EquationElementConst equationElementConst)
   newConstLiteral->constValue = equationElementConst;
   return newConstLiteral;
 }
+
 
 typedef enum
 {
@@ -85,6 +88,7 @@ BinaryOperationElement *binaryOperationElementCreate(BinaryOperation operation)
   newBinaryOperationElement->operation = operation;
   return newBinaryOperationElement;
 }
+
 
 typedef struct
 {
@@ -111,6 +115,7 @@ void fractionDestroy(Fraction *fraction)
   free(fraction);
 }
 
+
 typedef struct
 {
   EquationElementHeader header;
@@ -127,6 +132,7 @@ Radical *radicalLiteralCreate(EquationElementHeader *radicand, EquationElementHe
   newRadicalLiteral->degree = degree;
   return newRadicalLiteral;
 }
+
 
 typedef enum
 {
@@ -160,6 +166,7 @@ Function *functionCreate(int parameterCount, EquationElementHeader **parameterHe
   newFunction->parameterHeaders = parameterHeaders;
   return newFunction;
 }
+
 
 typedef enum
 {
@@ -200,6 +207,7 @@ Variable *variableCreate(VariableWithinRestriction (*restrictionFunction)(Equati
   return newVariable;
 }
 
+
 typedef struct
 {
   EquationElementHeader header;
@@ -229,68 +237,12 @@ void equationDestroy(Equation *equation)
   free(equation);
 }
 
-int *primeFactorize(int k, int *length)
-{
-  int *primeArray;
-  primeArray = (int *)malloc(32 * sizeof(int));
-  int *p = primeArray;
 
-  int i = 2;
-  while(i <= k)
-  {
-    if(k == 1)
-    {
-      break;
-    }
-
-    if(k % i == 0)
-    {
-      k /= i;
-      *p = i;
-      p++;
-      (*length)++;
-    }
-    else
-    {
-      i++;
-    }
-  }
-
-  return primeArray;
-}
-
-Fraction *integerFractionCreate(int numerator, int denominator)
-{
-  if(denominator < 0)
-  {
-    numerator *= -1;
-    denominator *= -1;
-  }
-
-  int i = 2;
-  while(i <= abs(numerator))
-  {
-    if(numerator % i == 0 && denominator % i == 0)
-    {
-      numerator /= i;
-      denominator /= i;
-    }
-    else
-    {
-      i++;
-    }
-  }
-
-  EquationElementHeader *numeratorHeader;
-  numeratorHeader = (EquationElementHeader *)integerCreate(numerator);
-  EquationElementHeader *denominatorHeader;
-  denominatorHeader = (EquationElementHeader *)integerCreate(denominator);
-
-  return fractionCreate(numeratorHeader, denominatorHeader);
-}
 
 const unsigned char KEEP_PARAMETERS = 0;
 const unsigned char FREE_PARAMETERS = 1;
+
+
 
 EquationElementHeader *integerLiteralAddIntegerLiteral(IntegerLiteral *a, IntegerLiteral *b, unsigned char freeParameters);
 EquationElementHeader *integerLiteralAddConstLiteral(IntegerLiteral *a, ConstLiteral *b, unsigned char freeParameters);
@@ -320,6 +272,13 @@ EquationElementHeader *radicalAddRadical(Radical *a, Radical *b, unsigned char f
 EquationElementHeader *radicalAddEquation(Radical *a, Equation *b, unsigned char freeParameters);
 EquationElementHeader *radicalAddVariable(Radical *a, Variable *b, unsigned char freeParameters);
 
+EquationElementHeader *variableAddIntegerLiteral(Variable *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *variableAddConstLiteral(Variable *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *variableAddFraction(Variable *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *variableAddRadical(Variable *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *variableAddEquation(Variable *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *variableAddVariable(Variable *a, Variable *b, unsigned char freeParameters);
+
 EquationElementHeader *equationAddIntegerLiteral(Equation *a, IntegerLiteral *b, unsigned char freeParameters);
 EquationElementHeader *equationAddConstLiteral(Equation *a, ConstLiteral *b, unsigned char freeParameters);
 EquationElementHeader *equationAddFraction(Equation *a, Fraction *b, unsigned char freeParameters);
@@ -327,9 +286,217 @@ EquationElementHeader *equationAddRadical(Equation *a, Radical *b, unsigned char
 EquationElementHeader *equationAddEquation(Equation *a, Equation *b, unsigned char freeParameters);
 EquationElementHeader *equationAddVariable(Equation *a, Variable *b, unsigned char freeParameters);
 
-EquationElementHeader *variableAddIntegerLiteral(Variable *a, IntegerLiteral *b, unsigned char freeParameters);
-EquationElementHeader *variableAddConstLiteral(Variable *a, ConstLiteral *b, unsigned char freeParameters);
-EquationElementHeader *variableAddFraction(Variable *a, Fraction *b, unsigned char freeParameters);
-EquationElementHeader *variableAddRadical(Variable *a, Radical *b, unsigned char freeParameters);
-EquationElementHeader *variableAddEquation(Variable *a, Equation *b, unsigned char freeParameters);
-EquationElementHeader *variableAddVariable(Variable *a, Variable *b, unsigned char freeParameters);
+
+
+EquationElementHeader *integerLiteralMultiplyIntegerLiteral(IntegerLiteral *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *integerLiteralMultiplyConstLiteral(IntegerLiteral *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *integerLiteralMultiplyFraction(IntegerLiteral *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *integerLiteralMultiplyRadical(IntegerLiteral *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *integerLiteralMultiplyEquation(IntegerLiteral *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *integerLiteralMultiplyVariable(IntegerLiteral *a, Variable *b, unsigned char freeParameters);
+
+EquationElementHeader *constLiteralMultiplyIntegerLiteral(ConstLiteral *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *constLiteralMultiplyConstLiteral(ConstLiteral *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *constLiteralMultiplyFraction(ConstLiteral *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *constLiteralMultiplyRadical(ConstLiteral *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *constLiteralMultiplyEquation(ConstLiteral *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *constLiteralMultiplyVariable(ConstLiteral *a, Variable *b, unsigned char freeParameters);
+
+EquationElementHeader *fractionMultiplyIntegerLiteral(Fraction *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *fractionMultiplyConstLiteral(Fraction *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *fractionMultiplyFraction(Fraction *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *fractionMultiplyRadical(Fraction *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *fractionMultiplyEquation(Fraction *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *fractionMultiplyVariable(Fraction *a, Variable *b, unsigned char freeParameters);
+
+EquationElementHeader *radicalMultiplyIntegerLiteral(Radical *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *radicalMultiplyConstLiteral(Radical *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *radicalMultiplyFraction(Radical *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *radicalMultiplyRadical(Radical *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *radicalMultiplyEquation(Radical *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *radicalMultiplyVariable(Radical *a, Variable *b, unsigned char freeParameters);
+
+EquationElementHeader *variableMultiplyIntegerLiteral(Variable *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *variableMultiplyConstLiteral(Variable *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *variableMultiplyFraction(Variable *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *variableMultiplyRadical(Variable *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *variableMultiplyEquation(Variable *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *variableMultiplyVariable(Variable *a, Variable *b, unsigned char freeParameters);
+
+EquationElementHeader *equationMultiplyIntegerLiteral(Equation *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *equationMultiplyConstLiteral(Equation *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *equationMultiplyFraction(Equation *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *equationMultiplyRadical(Equation *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *equationMultiplyEquation(Equation *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *equationMultiplyVariable(Equation *a, Variable *b, unsigned char freeParameters);
+
+
+
+EquationElementHeader *integerLiteralSubtractIntegerLiteral(IntegerLiteral *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *integerLiteralSubtractConstLiteral(IntegerLiteral *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *integerLiteralSubtractFraction(IntegerLiteral *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *integerLiteralSubtractRadical(IntegerLiteral *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *integerLiteralSubtractEquation(IntegerLiteral *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *integerLiteralSubtractVariable(IntegerLiteral *a, Variable *b, unsigned char freeParameters);
+
+EquationElementHeader *constLiteralSubtractIntegerLiteral(ConstLiteral *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *constLiteralSubtractConstLiteral(ConstLiteral *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *constLiteralSubtractFraction(ConstLiteral *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *constLiteralSubtractRadical(ConstLiteral *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *constLiteralSubtractEquation(ConstLiteral *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *constLiteralSubtractVariable(ConstLiteral *a, Variable *b, unsigned char freeParameters);
+
+EquationElementHeader *fractionSubtractIntegerLiteral(Fraction *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *fractionSubtractConstLiteral(Fraction *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *fractionSubtractFraction(Fraction *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *fractionSubtractRadical(Fraction *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *fractionSubtractEquation(Fraction *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *fractionSubtractVariable(Fraction *a, Variable *b, unsigned char freeParameters);
+
+EquationElementHeader *radicalSubtractIntegerLiteral(Radical *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *radicalSubtractConstLiteral(Radical *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *radicalSubtractFraction(Radical *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *radicalSubtractRadical(Radical *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *radicalSubtractEquation(Radical *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *radicalSubtractVariable(Radical *a, Variable *b, unsigned char freeParameters);
+
+EquationElementHeader *variableSubtractIntegerLiteral(Variable *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *variableSubtractConstLiteral(Variable *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *variableSubtractFraction(Variable *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *variableSubtractRadical(Variable *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *variableSubtractEquation(Variable *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *variableSubtractVariable(Variable *a, Variable *b, unsigned char freeParameters);
+
+EquationElementHeader *equationSubtractIntegerLiteral(Equation *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *equationSubtractConstLiteral(Equation *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *equationSubtractFraction(Equation *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *equationSubtractRadical(Equation *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *equationSubtractEquation(Equation *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *equationSubtractVariable(Equation *a, Variable *b, unsigned char freeParameters);
+
+
+
+EquationElementHeader *integerLiteralDivideIntegerLiteral(IntegerLiteral *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *integerLiteralDivideConstLiteral(IntegerLiteral *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *integerLiteralDivideFraction(IntegerLiteral *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *integerLiteralDivideRadical(IntegerLiteral *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *integerLiteralDivideEquation(IntegerLiteral *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *integerLiteralDivideVariable(IntegerLiteral *a, Variable *b, unsigned char freeParameters);
+
+EquationElementHeader *constLiteralDivideIntegerLiteral(ConstLiteral *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *constLiteralDivideConstLiteral(ConstLiteral *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *constLiteralDivideFraction(ConstLiteral *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *constLiteralDivideRadical(ConstLiteral *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *constLiteralDivideEquation(ConstLiteral *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *constLiteralDivideVariable(ConstLiteral *a, Variable *b, unsigned char freeParameters);
+
+EquationElementHeader *fractionDivideIntegerLiteral(Fraction *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *fractionDivideConstLiteral(Fraction *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *fractionDivideFraction(Fraction *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *fractionDivideRadical(Fraction *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *fractionDivideEquation(Fraction *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *fractionDivideVariable(Fraction *a, Variable *b, unsigned char freeParameters);
+
+EquationElementHeader *radicalDivideIntegerLiteral(Radical *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *radicalDivideConstLiteral(Radical *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *radicalDivideFraction(Radical *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *radicalDivideRadical(Radical *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *radicalDivideEquation(Radical *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *radicalDivideVariable(Radical *a, Variable *b, unsigned char freeParameters);
+
+EquationElementHeader *variableDivideIntegerLiteral(Variable *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *variableDivideConstLiteral(Variable *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *variableDivideFraction(Variable *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *variableDivideRadical(Variable *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *variableDivideEquation(Variable *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *variableDivideVariable(Variable *a, Variable *b, unsigned char freeParameters);
+
+EquationElementHeader *equationDivideIntegerLiteral(Equation *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *equationDivideConstLiteral(Equation *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *equationDivideFraction(Equation *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *equationDivideRadical(Equation *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *equationDivideEquation(Equation *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *equationDivideVariable(Equation *a, Variable *b, unsigned char freeParameters);
+
+
+
+EquationElementHeader *integerLiteralPowerIntegerLiteral(IntegerLiteral *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *integerLiteralPowerConstLiteral(IntegerLiteral *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *integerLiteralPowerFraction(IntegerLiteral *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *integerLiteralPowerRadical(IntegerLiteral *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *integerLiteralPowerEquation(IntegerLiteral *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *integerLiteralPowerVariable(IntegerLiteral *a, Variable *b, unsigned char freeParameters);
+
+EquationElementHeader *constLiteralPowerIntegerLiteral(ConstLiteral *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *constLiteralPowerConstLiteral(ConstLiteral *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *constLiteralPowerFraction(ConstLiteral *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *constLiteralPowerRadical(ConstLiteral *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *constLiteralPowerEquation(ConstLiteral *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *constLiteralPowerVariable(ConstLiteral *a, Variable *b, unsigned char freeParameters);
+
+EquationElementHeader *fractionPowerIntegerLiteral(Fraction *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *fractionPowerConstLiteral(Fraction *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *fractionPowerFraction(Fraction *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *fractionPowerRadical(Fraction *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *fractionPowerEquation(Fraction *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *fractionPowerVariable(Fraction *a, Variable *b, unsigned char freeParameters);
+
+EquationElementHeader *radicalPowerIntegerLiteral(Radical *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *radicalPowerConstLiteral(Radical *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *radicalPowerFraction(Radical *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *radicalPowerRadical(Radical *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *radicalPowerEquation(Radical *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *radicalPowerVariable(Radical *a, Variable *b, unsigned char freeParameters);
+
+EquationElementHeader *variablePowerIntegerLiteral(Variable *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *variablePowerConstLiteral(Variable *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *variablePowerFraction(Variable *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *variablePowerRadical(Variable *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *variablePowerEquation(Variable *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *variablePowerVariable(Variable *a, Variable *b, unsigned char freeParameters);
+
+EquationElementHeader *equationPowerIntegerLiteral(Equation *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *equationPowerConstLiteral(Equation *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *equationPowerFraction(Equation *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *equationPowerRadical(Equation *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *equationPowerEquation(Equation *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *equationPowerVariable(Equation *a, Variable *b, unsigned char freeParameters);
+
+
+
+EquationElementHeader *integerSimplify(IntegerLiteral *a);
+EquationElementHeader *constLiteralSimplify(IntegerLiteral *a);
+EquationElementHeader *fractionSimplify(IntegerLiteral *a);
+EquationElementHeader *radicalSimplify(IntegerLiteral *a);
+EquationElementHeader *variableSimplify(IntegerLiteral *a);
+EquationElementHeader *equationSimplify(IntegerLiteral *a);
+
+
+int *primeFactorize(int k, int *length){
+  int *primeArray;
+  primeArray = (int *)malloc(32 * sizeof(int));
+  int *p = primeArray;
+
+  int i = 2;
+  while(i <= k)
+  {
+    if(k == 1)
+    {
+      break;
+    }
+
+    if(k % i == 0)
+    {
+      k /= i;
+      *p = i;
+      p++;
+      (*length)++;
+    }
+    else
+    {
+      i++;
+    }
+  }
+
+  return primeArray;
+}

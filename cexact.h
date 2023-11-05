@@ -10,7 +10,9 @@ typedef enum
   EquationElementEquation,
   EquationElementVariable,
   EquationElementOperation,
-  EquationElementFunction
+  EquationElementFunction,
+  EquationElementEndOfEquation,
+  EquationElementSkipMe
 } EquationElement;
 
 typedef struct
@@ -124,14 +126,16 @@ RadicalLiteral *radicalLiteralCreate(EquationElementHeader *radicand, EquationEl
 
 typedef enum
 {
+  FunctionTypeNone,
+
   FunctionTypeSin,
   FunctionTypeCos,
   FunctionTypeTan,
   FunctionTypeCot,
   FunctionTypeCsc,
   FunctionTypeSec,
-
   FunctionTypeAbs,
+
   FunctionTypeMax,
   FunctionTypeMin
 } FunctionType;
@@ -153,6 +157,45 @@ Function *functionCreate(int parameterCount, EquationElementHeader **parameterHe
   return newFunction;
 }
 
+typedef enum
+{
+  VariableNameA,
+  VariableNameB,
+  VariableNameC,
+  VariableNameN,
+  VaribaleNameM,
+  VariableNameT,
+  VariableNameX,
+  VariableNameY,
+  VariableNameZ,
+  VariableNameAlpha,
+  VariableNameBeta,
+  VariableNameTheta
+} VariableName;
+
+typedef enum
+{
+  VariableWithinRestrictionFalse,
+  VariableWithinRestrictionTrue
+} VariableWithinRestriction;
+
+typedef struct
+{
+  EquationElementHeader header;
+  VariableName name;
+  VariableWithinRestriction (*restrictionFunction)(EquationElementHeader);
+} Variable;
+
+Variable *variableCreate(VariableWithinRestriction (*restrictionFunction)(EquationElementHeader), VariableName variableName)
+{
+  Variable *newVariable;
+  newVariable = (Variable *)malloc(sizeof(Variable));
+  newVariable->header = equationElementHeaderCreate(EquationElementVariable);
+  newVariable->name = variableName;
+  newVariable->restrictionFunction = restrictionFunction;
+  return newVariable;
+}
+
 typedef struct
 {
   EquationElementHeader header;
@@ -160,21 +203,12 @@ typedef struct
   int lengthOfEquation;
 } Equation;
 
-Equation *equationCreate(char *string, int stringLength)
+Equation *equationCreate(int headerCount)
 {
   Equation *newEquation;
   newEquation = (Equation *)malloc(sizeof(Equation));
-  int equationLength = 0;
-
   EquationElementHeader **headers;
-  headers = (EquationElementHeader **)malloc(sizeof(EquationElementHeader **) * stringLength);
-
-  int i;
-  while(i < stringLength)
-  {
-    headers = parseEquation(*string);
-  }
-
+  headers = (EquationElementHeader **)malloc(sizeof(EquationElementHeader **) * (headerCount + 1));
   newEquation->header = equationElementHeaderCreate(EquationElementEquation);
   newEquation->equationHeaders = headers;
   return newEquation;

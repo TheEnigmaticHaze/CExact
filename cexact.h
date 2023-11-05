@@ -4,10 +4,10 @@ typedef enum
 {
   EquationElementIntegerLiteral,
   EquationElementConstLiteral,
-  EquationElementIntegerFractionLiteral,
-  EquationElementRadicalLiteral,
-  EquationElementEquation,
+  EquationElementFraction,
+  EquationElementRadical,
   EquationElementVariable,
+  EquationElementEquation,
   EquationElementOperation,
   EquationElementFunction,
   EquationElementEndOfEquation,
@@ -97,7 +97,7 @@ Fraction *fractionCreate(EquationElementHeader *numerator, EquationElementHeader
 {
   Fraction *fraction;
   fraction = (Fraction *)malloc(sizeof(Fraction));
-  fraction->header = equationElementHeaderCreate(EquationElementIntegerFractionLiteral);
+  fraction->header = equationElementHeaderCreate(EquationElementFraction);
   fraction->numerator = numerator;
   fraction->denominator = denominator;
 
@@ -116,13 +116,13 @@ typedef struct
   EquationElementHeader header;
   EquationElementHeader *radicand;
   EquationElementHeader *degree;
-} RadicalLiteral;
+} Radical;
 
-RadicalLiteral *radicalLiteralCreate(EquationElementHeader *radicand, EquationElementHeader *degree)
+Radical *radicalLiteralCreate(EquationElementHeader *radicand, EquationElementHeader *degree)
 {
-  RadicalLiteral *newRadicalLiteral;
-  newRadicalLiteral = (RadicalLiteral *)malloc(sizeof(RadicalLiteral));
-  newRadicalLiteral->header = equationElementHeaderCreate(EquationElementRadicalLiteral);
+  Radical *newRadicalLiteral;
+  newRadicalLiteral = (Radical *)malloc(sizeof(Radical));
+  newRadicalLiteral->header = equationElementHeaderCreate(EquationElementRadical);
   newRadicalLiteral->radicand = radicand;
   newRadicalLiteral->degree = degree;
   return newRadicalLiteral;
@@ -288,3 +288,48 @@ Fraction *integerFractionCreate(int numerator, int denominator)
 
   return fractionCreate(numeratorHeader, denominatorHeader);
 }
+
+const unsigned char KEEP_PARAMETERS = 0;
+const unsigned char FREE_PARAMETERS = 1;
+
+EquationElementHeader *integerLiteralAddIntegerLiteral(IntegerLiteral *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *integerLiteralAddConstLiteral(IntegerLiteral *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *integerLiteralAddFraction(IntegerLiteral *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *integerLiteralAddRadical(IntegerLiteral *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *integerLiteralAddEquation(IntegerLiteral *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *integerLiteralAddVariable(IntegerLiteral *a, Variable *b, unsigned char freeParameters);
+
+EquationElementHeader *constLiteralAddIntegerLiteral(ConstLiteral *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *constLiteralAddConstLiteral(ConstLiteral *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *constLiteralAddFraction(ConstLiteral *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *constLiteralAddRadical(ConstLiteral *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *constLiteralAddEquation(ConstLiteral *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *constLiteralAddVariable(ConstLiteral *a, Variable *b, unsigned char freeParameters);
+
+EquationElementHeader *fractionAddIntegerLiteral(Fraction *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *fractionAddConstLiteral(Fraction *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *fractionAddFraction(Fraction *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *fractionAddRadical(Fraction *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *fractionAddEquation(Fraction *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *fractionAddVariable(Fraction *a, Variable *b, unsigned char freeParameters);
+
+EquationElementHeader *radicalAddIntegerLiteral(Radical *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *radicalAddConstLiteral(Radical *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *radicalAddFraction(Radical *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *radicalAddRadical(Radical *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *radicalAddEquation(Radical *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *radicalAddVariable(Radical *a, Variable *b, unsigned char freeParameters);
+
+EquationElementHeader *equationAddIntegerLiteral(Equation *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *equationAddConstLiteral(Equation *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *equationAddFraction(Equation *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *equationAddRadical(Equation *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *equationAddEquation(Equation *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *equationAddVariable(Equation *a, Variable *b, unsigned char freeParameters);
+
+EquationElementHeader *variableAddIntegerLiteral(Variable *a, IntegerLiteral *b, unsigned char freeParameters);
+EquationElementHeader *variableAddConstLiteral(Variable *a, ConstLiteral *b, unsigned char freeParameters);
+EquationElementHeader *variableAddFraction(Variable *a, Fraction *b, unsigned char freeParameters);
+EquationElementHeader *variableAddRadical(Variable *a, Radical *b, unsigned char freeParameters);
+EquationElementHeader *variableAddEquation(Variable *a, Equation *b, unsigned char freeParameters);
+EquationElementHeader *variableAddVariable(Variable *a, Variable *b, unsigned char freeParameters);

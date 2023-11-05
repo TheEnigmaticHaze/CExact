@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 
 typedef enum
@@ -46,8 +45,6 @@ typedef enum
 {
   EquationElementConstPi,
   EquationElementConstE,
-  EquationElementConstLog2,
-  EquationElementConstLn2
 } EquationElementConst;
 
 typedef struct 
@@ -105,6 +102,13 @@ Fraction *fractionCreate(EquationElementHeader *numerator, EquationElementHeader
   fraction->denominator = denominator;
 
   return fraction;
+}
+
+void fractionDestroy(Fraction *fraction)
+{
+  free(fraction->numerator);
+  free(fraction->denominator);
+  free(fraction);
 }
 
 typedef struct

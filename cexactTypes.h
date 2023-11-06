@@ -33,7 +33,7 @@ typedef struct
   int value;
 } IntegerLiteral;
 
-IntegerLiteral *integerCreate(int value)
+IntegerLiteral *integerLiteralCreate(int value)
 {
   IntegerLiteral *newIntegerLiteral;
   newIntegerLiteral = (IntegerLiteral *)malloc(sizeof(IntegerLiteral));

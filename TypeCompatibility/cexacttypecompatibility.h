@@ -224,8 +224,8 @@ extern EquationElementHeader *equationPowerVariable(Equation *a, Variable *b, un
 
 
 extern EquationElementHeader *integerLiteralSimplify(IntegerLiteral *a);
-extern EquationElementHeader *constLiteralSimplify(IntegerLiteral *a);
-extern EquationElementHeader *fractionSimplify(IntegerLiteral *a);
-extern EquationElementHeader *radicalSimplify(IntegerLiteral *a);
-extern EquationElementHeader *variableSimplify(IntegerLiteral *a);
-extern EquationElementHeader *equationSimplify(IntegerLiteral *a);
+extern EquationElementHeader *constLiteralSimplify(ConstLiteral *a);
+extern EquationElementHeader *fractionSimplify(Fraction *a);
+extern EquationElementHeader *radicalSimplify(Radical *a);
+extern EquationElementHeader *variableSimplify(Variable *a);
+extern EquationElementHeader *equationSimplify(Equation *a);

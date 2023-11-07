@@ -8,7 +8,7 @@ typedef enum
   EquationElementRadical,
   EquationElementVariable,
   EquationElementEquation,
-  EquationElementOperation,
+  EquationElementBinaryOperation,
   EquationElementFunction,
   EquationElementEndOfEquation,
   EquationElementSkipMe
@@ -26,6 +26,7 @@ EquationElementHeader equationElementHeaderCreate(EquationElement element)
   return header;
 }
 
+extern EquationElementHeader *equationElementHeaderCopy(EquationElementHeader *toCopy);
 
 typedef struct
 {
@@ -41,6 +42,17 @@ IntegerLiteral *integerLiteralCreate(int value)
   newIntegerLiteral->value = value;
   return newIntegerLiteral;
 }
+
+void integerLiteralDestroy(IntegerLiteral *toDestroy)
+{
+  free(toDestroy);
+}
+
+IntegerLiteral *integerLiteralCopy(IntegerLiteral *toCopy)
+{
+  return integerLiteralCreate(toCopy->value);
+}
+
 
 typedef enum
 {
@@ -64,6 +76,16 @@ ConstLiteral *constLiteralCreate(EquationElementConst equationElementConst)
   return newConstLiteral;
 }
 
+void constLiteralDestroy(ConstLiteral *toDestroy)
+{
+  free(toDestroy);
+}
+
+ConstLiteral *constLiteralCopy(ConstLiteral *toCopy)
+{
+  return constLiteralCreate(toCopy->constValue);
+}
+
 
 typedef enum
 {
@@ -84,9 +106,19 @@ BinaryOperationElement *binaryOperationElementCreate(BinaryOperation operation)
 {
   BinaryOperationElement *newBinaryOperationElement;
   newBinaryOperationElement = (BinaryOperationElement *)malloc(sizeof(BinaryOperationElement));
-  newBinaryOperationElement->header = equationElementHeaderCreate(EquationElementOperation);
+  newBinaryOperationElement->header = equationElementHeaderCreate(EquationElementBinaryOperation);
   newBinaryOperationElement->operation = operation;
   return newBinaryOperationElement;
+}
+
+void binaryOperationElementDestroy(BinaryOperationElement *toDestroy)
+{
+  free(toDestroy);
+}
+
+BinaryOperationElement *binaryOperationElementCopy(BinaryOperationElement *toCopy)
+{
+  return binaryOperationElementCreate(toCopy->operation);
 }
 
 
@@ -115,6 +147,13 @@ void fractionDestroy(Fraction *fraction)
   free(fraction);
 }
 
+Fraction *fractionCopy(Fraction *toCopy)
+{
+  EquationElementHeader *newNumerator = equationElementHeaderCopy(toCopy->numerator);
+  EquationElementHeader *newDenominator = equationElementHeaderCopy(toCopy->denominator);
+  return fractionCreate(newNumerator, newDenominator);
+}
+
 
 typedef struct
 {
@@ -123,7 +162,7 @@ typedef struct
   EquationElementHeader *degree;
 } Radical;
 
-Radical *radicalLiteralCreate(EquationElementHeader *radicand, EquationElementHeader *degree)
+Radical *radicalCreate(EquationElementHeader *radicand, EquationElementHeader *degree)
 {
   Radical *newRadicalLiteral;
   newRadicalLiteral = (Radical *)malloc(sizeof(Radical));
@@ -131,6 +170,20 @@ Radical *radicalLiteralCreate(EquationElementHeader *radicand, EquationElementHe
   newRadicalLiteral->radicand = radicand;
   newRadicalLiteral->degree = degree;
   return newRadicalLiteral;
+}
+
+void radicalFree(Radical *toDestroy)
+{
+  free(toDestroy->degree);
+  free(toDestroy->radicand);
+  free(toDestroy);
+}
+
+Radical *radicalCopy(Radical *toCopy)
+{
+  EquationElementHeader *newRadicand = equationElementHeaderCopy(toCopy->radicand);
+  EquationElementHeader *newDegree = equationElementHeaderCopy(toCopy->degree);
+  return radicalCreate(newRadicand, newDegree);
 }
 
 
@@ -151,6 +204,7 @@ typedef struct
 {
   EquationElementHeader header;
   EquationElementHeader *parameterHeader;
+  FunctionType functionType;
 } Function;
 
 Function *functionCreate(EquationElementHeader *parameterHeader, FunctionType functionType)
@@ -159,7 +213,20 @@ Function *functionCreate(EquationElementHeader *parameterHeader, FunctionType fu
   newFunction = (Function *)malloc(sizeof(Function));
   newFunction->header = equationElementHeaderCreate(EquationElementFunction);
   newFunction->parameterHeader = parameterHeader;
+  newFunction->functionType = functionType;
   return newFunction;
+}
+
+void functionDestroy(Function *toDestroy)
+{
+  free(toDestroy->parameterHeader);
+  free(toDestroy);
+}
+
+Function *functionCopy(Function *toCopy)
+{
+  EquationElementHeader *newParameter = equationElementHeaderCopy(toCopy->parameterHeader);
+  return functionCreate(newParameter, toCopy->functionType);
 }
 
 
@@ -189,17 +256,25 @@ typedef struct
 {
   EquationElementHeader header;
   VariableName name;
-  VariableWithinRestriction (*restrictionFunction)(EquationElementHeader);
 } Variable;
 
-Variable *variableCreate(VariableWithinRestriction (*restrictionFunction)(EquationElementHeader), VariableName variableName)
+Variable *variableCreate(VariableName variableName)
 {
   Variable *newVariable;
   newVariable = (Variable *)malloc(sizeof(Variable));
   newVariable->header = equationElementHeaderCreate(EquationElementVariable);
   newVariable->name = variableName;
-  newVariable->restrictionFunction = restrictionFunction;
   return newVariable;
+}
+
+void variableDestroy(Variable *toDestroy)
+{
+  free(toDestroy);
+}
+
+Variable *variableCopy(Variable *toCopy)
+{
+  return variableCreate(toCopy->name);
 }
 
 
@@ -221,13 +296,59 @@ Equation *equationCreate(int headerCount)
   return newEquation;
 }
 
-void equationDestroy(Equation *equation)
+void equationDestroy(Equation *toDestroy)
 {
   int i;
-  for(i = 0; i < equation->lengthOfEquation; i++)
+  for(i = 0; i < toDestroy->lengthOfEquation; i++)
   {
-    free((equation->equationHeaders)[i]);
+    free((toDestroy->equationHeaders)[i]);
   }
-  free(equation->equationHeaders);
-  free(equation);
+  free(toDestroy->equationHeaders);
+  free(toDestroy);
+}
+
+Equation *equationCopy(Equation *toCopy)
+{
+  Equation *newEquation = equationCreate(toCopy->lengthOfEquation);
+  int headerIndex;
+  for(headerIndex = 0; headerIndex < newEquation->lengthOfEquation; headerIndex++)
+  {
+    (newEquation->equationHeaders)[headerIndex] = equationElementHeaderCopy((toCopy->equationHeaders)[headerIndex]);
+  }
+  return newEquation;
+}
+
+
+EquationElementHeader * equationElementHeaderCopy(EquationElementHeader *toCopy)
+{
+  switch (toCopy->equationElementType)
+  {
+  case EquationElementIntegerLiteral:
+    return (EquationElementHeader *)integerLiteralCopy((IntegerLiteral *)toCopy);
+  
+  case EquationElementConstLiteral:
+    return (EquationElementHeader *)constLiteralCopy((ConstLiteral *)toCopy);
+  
+  case EquationElementFraction:
+    return (EquationElementHeader *)fractionCopy((Fraction *)toCopy);
+
+  case EquationElementRadical:
+    return (EquationElementHeader *)radicalCopy((Radical *)toCopy);
+
+  case EquationElementVariable:
+    return (EquationElementHeader *)variableCopy((Variable *)toCopy);
+
+  case EquationElementEquation:
+    return (EquationElementHeader *)equationCopy((Equation *)toCopy);
+  
+  case EquationElementBinaryOperation:
+    return (EquationElementHeader *)binaryOperationElementCopy((BinaryOperationElement *)toCopy);
+
+  case EquationElementFunction:
+    return (EquationElementHeader *)functionCopy((Function *)toCopy);
+
+  default:
+    EquationElementHeader newHeader =  equationElementHeaderCreate(toCopy->equationElementType);
+    return &newHeader;
+  }
 }

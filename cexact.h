@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "TypeCompatibility\cexacttypecompatibility.h"
+#include ".\TypeCompatibility\cexacttypecompatibility.h"
 
 int *primeFactorize(int k, int *length){
   int *primeArray;

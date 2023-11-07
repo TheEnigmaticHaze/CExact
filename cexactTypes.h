@@ -145,25 +145,20 @@ typedef enum
   FunctionTypeCsc,
   FunctionTypeSec,
   FunctionTypeAbs,
-
-  FunctionTypeMax,
-  FunctionTypeMin
 } FunctionType;
 
 typedef struct
 {
   EquationElementHeader header;
-  int parameterCount;
-  EquationElementHeader **parameterHeaders;
+  EquationElementHeader *parameterHeader;
 } Function;
 
-Function *functionCreate(int parameterCount, EquationElementHeader **parameterHeaders, FunctionType functionType)
+Function *functionCreate(EquationElementHeader *parameterHeader, FunctionType functionType)
 {
   Function *newFunction;
   newFunction = (Function *)malloc(sizeof(Function));
   newFunction->header = equationElementHeaderCreate(EquationElementFunction);
-  newFunction->parameterCount = parameterCount;
-  newFunction->parameterHeaders = parameterHeaders;
+  newFunction->parameterHeader = parameterHeader;
   return newFunction;
 }
 

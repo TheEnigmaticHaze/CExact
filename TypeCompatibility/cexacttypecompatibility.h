@@ -1,5 +1,11 @@
 #include "..\cexactTypes.h"
 
+extern EquationElementHeader *equationElementHeaderAddEquationElementHeader(EquationElementHeader *a, EquationElementHeader *b);
+extern EquationElementHeader *equationElementHeaderMultiplyEquationElementHeader(EquationElementHeader *a, EquationElementHeader *b);
+extern EquationElementHeader *equationElementHeaderSubtractEquationElementHeader(EquationElementHeader *a, EquationElementHeader *b);
+extern EquationElementHeader *equationElementHeaderDivideEquationElementHeader(EquationElementHeader *a, EquationElementHeader *b);
+extern EquationElementHeader *equationElementHeaderPowerEquationElementHeader(EquationElementHeader *a, EquationElementHeader *b);
+
 
 EquationElementHeader *integerLiteralAddIntegerLiteral(IntegerLiteral *a, IntegerLiteral *b)
 {
@@ -8,12 +14,55 @@ EquationElementHeader *integerLiteralAddIntegerLiteral(IntegerLiteral *a, Intege
 EquationElementHeader *integerLiteralAddConstLiteral(IntegerLiteral *a, ConstLiteral *b)
 {
   Equation *newEquation = equationCreate(3);
-  (newEquation->equationHeaders)[0] = integerLiteralCopy(a);
+  (newEquation->equationHeaders)[0] = (EquationElementHeader *)integerLiteralCopy(a);
+  (newEquation->equationHeaders)[1] = (EquationElementHeader *)binaryOperationElementCreate(OperationAdd);
+  (newEquation->equationHeaders)[2] = (EquationElementHeader *)constLiteralCopy(b);
+  return (EquationElementHeader *)newEquation;
 }
-EquationElementHeader *integerLiteralAddFraction(IntegerLiteral *a, Fraction *b);
-EquationElementHeader *integerLiteralAddRadical(IntegerLiteral *a, Radical *b);
-EquationElementHeader *integerLiteralAddVariable(IntegerLiteral *a, Variable *b);
-EquationElementHeader *integerLiteralAddEquation(IntegerLiteral *a, Equation *b);
+EquationElementHeader *integerLiteralAddFraction(IntegerLiteral *a, Fraction *b)
+{
+  EquationElementHeader *newNumerator = equationElementHeaderMultiplyEquationElementHeader((EquationElementHeader *)a, b->denominator);
+  newNumerator = equationElementHeaderAddEquationElementHeader(newNumerator, b->numerator);
+  return (EquationElementHeader *)fractionCreate(newNumerator, equationElementHeaderCopy(b->denominator));
+}
+EquationElementHeader *integerLiteralAddRadical(IntegerLiteral *a, Radical *b)
+{
+  Equation *newEquation = equationCreate(3);
+  (newEquation->equationHeaders)[0] = (EquationElementHeader *)integerLiteralCopy(a);
+  (newEquation->equationHeaders)[1] = (EquationElementHeader *)binaryOperationElementCreate(OperationAdd);
+  (newEquation->equationHeaders)[2] = (EquationElementHeader *)radicalCopy(b);
+  return (EquationElementHeader *)newEquation;
+}
+EquationElementHeader *integerLiteralAddVariable(IntegerLiteral *a, Variable *b)
+{
+  Equation *newEquation = equationCreate(3);
+  (newEquation->equationHeaders)[0] = (EquationElementHeader *)integerLiteralCopy(a);
+  (newEquation->equationHeaders)[1] = (EquationElementHeader *)binaryOperationElementCreate(OperationAdd);
+  (newEquation->equationHeaders)[2] = (EquationElementHeader *)variableCopy(b);
+  return (EquationElementHeader *)newEquation;
+}
+EquationElementHeader *integerLiteralAddEquation(IntegerLiteral *a, Equation *b)
+{
+  Equation *newEquation = equationCopy(b);
+  EquationElementHeader **currentHeader = newEquation->equationHeaders;
+  while((*currentHeader)->equationElementType != EquationElementEndOfEquation)
+  {
+    if((*currentHeader)->equationElementType == EquationElementIntegerLiteral)
+    {
+      int currentHeaderValue = ((IntegerLiteral *)(*currentHeader))->value; 
+      IntegerLiteral *newInteger = integerLiteralCreate(currentHeaderValue + a->value);
+      currentHeader = &newInteger;
+      return newEquation;
+    }
+    currentHeader++;
+  }
+  newEquation->equationHeaders = (EquationElementHeader **)realloc(newEquation->equationHeaders, newEquation->lengthOfEquation + 3);
+  (newEquation->equationHeaders)[newEquation->lengthOfEquation] = (EquationElementHeader *)binaryOperationElementCreate(OperationAdd);
+  (newEquation->equationHeaders)[newEquation->lengthOfEquation + 1] = (EquationElementHeader *)integerLiteralCopy(a);
+  EquationElementHeader endOfEquation = equationElementHeaderCreate(EquationElementEndOfEquation);
+  (newEquation->equationHeaders)[newEquation->lengthOfEquation + 2] = &endOfEquation;
+  return newEquation;
+}
 
 EquationElementHeader *constLiteralAddIntegerLiteral(ConstLiteral *a, IntegerLiteral *b);
 EquationElementHeader *constLiteralAddConstLiteral(ConstLiteral *a, ConstLiteral *b);

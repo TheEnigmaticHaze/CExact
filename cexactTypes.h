@@ -293,6 +293,8 @@ Equation *equationCreate(int headerCount)
   headers = (EquationElementHeader **)malloc(sizeof(EquationElementHeader **) * (headerCount + 1));
   newEquation->header = equationElementHeaderCreate(EquationElementEquation);
   newEquation->equationHeaders = headers;
+  EquationElementHeader endOfEquation = equationElementHeaderCreate(EquationElementEndOfEquation);
+  (newEquation->equationHeaders)[headerCount] = &endOfEquation;
   return newEquation;
 }
 
@@ -352,3 +354,4 @@ EquationElementHeader * equationElementHeaderCopy(EquationElementHeader *toCopy)
     return &newHeader;
   }
 }
+

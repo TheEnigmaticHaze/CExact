@@ -321,7 +321,7 @@ Equation *equationCopy(Equation *toCopy)
 }
 
 
-EquationElementHeader * equationElementHeaderCopy(EquationElementHeader *toCopy)
+EquationElementHeader *equationElementHeaderCopy(EquationElementHeader *toCopy)
 {
   switch (toCopy->equationElementType)
   {
@@ -350,8 +350,37 @@ EquationElementHeader * equationElementHeaderCopy(EquationElementHeader *toCopy)
     return (EquationElementHeader *)functionCopy((Function *)toCopy);
 
   default:
-    EquationElementHeader newHeader =  equationElementHeaderCreate(toCopy->equationElementType);
-    return &newHeader;
+    EquationElementHeader *newHeader = (EquationElementHeader *)malloc(sizeof(EquationElementHeader));
+    *newHeader = equationElementHeaderCreate(toCopy->equationElementType);
+    return newHeader;
   }
 }
 
+EquationElement typeOfHeader(EquationElementHeader *header)
+{
+  return header->equationElementType;
+}
+
+
+
+typedef enum
+{
+  IsTermFalse,
+  IsTermTrue
+} IsTermBool;
+
+IsTermBool isTerm(EquationElementHeader **headerOfEquation)
+{
+  EquationElementHeader *previousHeader = *(headerOfEquation - 1);
+  EquationElementHeader *nextHeader = *(headerOfEquation + 1);
+
+  unsigned char hasAdditionOnBothSides = typeOfHeader(previousHeader) == EquationElementBinaryOperation;
+  hasAdditionOnBothSides &= typeOfHeader(nextHeader) == EquationElementBinaryOperation;
+
+  if(hasAdditionOnBothSides)
+  {
+    hasAdditionOnBothSides &= ((BinaryOperationElement *)previousHeader)->operation == OperationAdd;
+    hasAdditionOnBothSides &= ((BinaryOperationElement *)nextHeader)->operation == OperationAdd;
+  }
+  return (hasAdditionOnBothSides ? IsTermTrue : IsTermFalse);
+}

@@ -7,6 +7,7 @@ extern EquationElementHeader *equationElementHeaderDivideEquationElementHeader(E
 extern EquationElementHeader *equationElementHeaderPowerEquationElementHeader(EquationElementHeader *a, EquationElementHeader *b);
 
 
+
 EquationElementHeader *integerLiteralAddIntegerLiteral(IntegerLiteral *a, IntegerLiteral *b)
 {
   return (EquationElementHeader *)integerLiteralCreate(a->value + b->value);
@@ -45,14 +46,14 @@ EquationElementHeader *integerLiteralAddEquation(IntegerLiteral *a, Equation *b)
 {
   Equation *newEquation = equationCopy(b);
   EquationElementHeader **currentHeader = newEquation->equationHeaders;
-  while((*currentHeader)->equationElementType != EquationElementEndOfEquation)
+  while(typeOfHeader(*currentHeader) != EquationElementEndOfEquation)
   {
-    if((*currentHeader)->equationElementType == EquationElementIntegerLiteral)
+    if((*currentHeader)->equationElementType == EquationElementIntegerLiteral && isTerm(currentHeader))
     {
       int currentHeaderValue = ((IntegerLiteral *)(*currentHeader))->value; 
       IntegerLiteral *newInteger = integerLiteralCreate(currentHeaderValue + a->value);
-      currentHeader = &newInteger;
-      return newEquation;
+      *currentHeader = (EquationElementHeader *)newInteger;
+      return (EquationElementHeader *)newEquation;
     }
     currentHeader++;
   }
@@ -61,15 +62,53 @@ EquationElementHeader *integerLiteralAddEquation(IntegerLiteral *a, Equation *b)
   (newEquation->equationHeaders)[newEquation->lengthOfEquation + 1] = (EquationElementHeader *)integerLiteralCopy(a);
   EquationElementHeader endOfEquation = equationElementHeaderCreate(EquationElementEndOfEquation);
   (newEquation->equationHeaders)[newEquation->lengthOfEquation + 2] = &endOfEquation;
-  return newEquation;
+  return (EquationElementHeader *)newEquation;
 }
 
-EquationElementHeader *constLiteralAddIntegerLiteral(ConstLiteral *a, IntegerLiteral *b);
-EquationElementHeader *constLiteralAddConstLiteral(ConstLiteral *a, ConstLiteral *b);
-EquationElementHeader *constLiteralAddFraction(ConstLiteral *a, Fraction *b);
-EquationElementHeader *constLiteralAddRadical(ConstLiteral *a, Radical *b);
-EquationElementHeader *constLiteralAddVariable(ConstLiteral *a, Variable *b);
-EquationElementHeader *constLiteralAddEquation(ConstLiteral *a, Equation *b);
+EquationElementHeader *constLiteralAddIntegerLiteral(ConstLiteral *a, IntegerLiteral *b)
+{
+  return integerLiteralAddConstLiteral(b, a);
+}
+EquationElementHeader *constLiteralAddConstLiteral(ConstLiteral *a, ConstLiteral *b)
+{
+  Equation *newEquation = equationCreate(3);
+  (newEquation->equationHeaders)[0] = (EquationElementHeader *)constLiteralCopy(a);
+  (newEquation->equationHeaders)[1] = (EquationElementHeader *)binaryOperationElementCreate(OperationAdd);
+  (newEquation->equationHeaders)[2] = (EquationElementHeader *)constLiteralCopy(b);
+  return (EquationElementHeader *)newEquation;
+}
+EquationElementHeader *constLiteralAddFraction(ConstLiteral *a, Fraction *b)
+{
+  EquationElementHeader *newNumerator = equationElementHeaderMultiplyEquationElementHeader((EquationElementHeader *)a, b->denominator);
+  newNumerator = equationElementHeaderAddEquationElementHeader(newNumerator, b->numerator);
+  return (EquationElementHeader *)fractionCreate(newNumerator, equationElementHeaderCopy(b->denominator));
+}
+EquationElementHeader *constLiteralAddRadical(ConstLiteral *a, Radical *b)
+{
+  Equation *newEquation = equationCreate(3);
+  (newEquation->equationHeaders)[0] = (EquationElementHeader *)constLiteralCopy(a);
+  (newEquation->equationHeaders)[1] = (EquationElementHeader *)binaryOperationElementCreate(OperationAdd);
+  (newEquation->equationHeaders)[2] = (EquationElementHeader *)radicalCopy(b);
+  return (EquationElementHeader *)newEquation;
+}
+EquationElementHeader *constLiteralAddVariable(ConstLiteral *a, Variable *b)
+{
+  Equation *newEquation = equationCreate(3);
+  (newEquation->equationHeaders)[0] = (EquationElementHeader *)constLiteralCopy(a);
+  (newEquation->equationHeaders)[1] = (EquationElementHeader *)binaryOperationElementCreate(OperationAdd);
+  (newEquation->equationHeaders)[2] = (EquationElementHeader *)variableCopy(b);
+  return (EquationElementHeader *)newEquation;
+}
+EquationElementHeader *constLiteralAddEquation(ConstLiteral *a, Equation *b)
+{
+  Equation *newEquation = equationCopy(b);
+  newEquation->equationHeaders = (EquationElementHeader **)realloc(newEquation->equationHeaders, newEquation->lengthOfEquation + 3);
+  (newEquation->equationHeaders)[newEquation->lengthOfEquation] = (EquationElementHeader *)binaryOperationElementCreate(OperationAdd);
+  (newEquation->equationHeaders)[newEquation->lengthOfEquation + 1] = (EquationElementHeader *)constLiteralCopy(a);
+  EquationElementHeader endOfEquation = equationElementHeaderCreate(EquationElementEndOfEquation);
+  (newEquation->equationHeaders)[newEquation->lengthOfEquation + 2] = &endOfEquation;
+  return (EquationElementHeader *)newEquation;
+}
 
 EquationElementHeader *fractionAddIntegerLiteral(Fraction *a, IntegerLiteral *b);
 EquationElementHeader *fractionAddConstLiteral(Fraction *a, ConstLiteral *b);
@@ -283,3 +322,219 @@ EquationElementHeader *fractionSimplify(Fraction *a);
 EquationElementHeader *radicalSimplify(Radical *a);
 EquationElementHeader *variableSimplify(Variable *a);
 EquationElementHeader *equationSimplify(Equation *a);
+
+
+EquationElementHeader *equationElementHeaderAddEquationElementHeader(EquationElementHeader *a, EquationElementHeader *b)
+{
+  EquationElement typeOfA = typeOfHeader(a);
+  EquationElement typeOfB = typeOfHeader(b);
+
+  switch(typeOfA)
+  {
+    case EquationElementIntegerLiteral:
+      switch(typeOfB)
+      {
+        case EquationElementIntegerLiteral:
+          return integerLiteralAddIntegerLiteral((IntegerLiteral *)a, (IntegerLiteral *)b);
+        case EquationElementConstLiteral:
+          return integerLiteralAddConstLiteral((IntegerLiteral *)a, (ConstLiteral *)b);
+        case EquationElementFraction:
+          return integerLiteralAddFraction((IntegerLiteral *)a, (Fraction *)b);
+        case EquationElementRadical:
+          return integerLiteralAddRadical((IntegerLiteral *)a, (Radical *)b);
+        case EquationElementVariable:
+          return integerLiteralAddVariable((IntegerLiteral *)a, (Variable *)b);
+        case EquationElementEquation:
+          return integerLiteralAddEquation((IntegerLiteral *)a, (Equation *)b);
+      }
+    case EquationElementConstLiteral:
+      switch(typeOfB)
+      {
+        case EquationElementIntegerLiteral:
+          return constLiteralAddIntegerLiteral((ConstLiteral *)a, (IntegerLiteral *)b);
+        case EquationElementConstLiteral:
+          return constLiteralAddConstLiteral((ConstLiteral *)a, (ConstLiteral *)b);
+        case EquationElementFraction:
+          return constLiteralAddFraction((ConstLiteral *)a, (Fraction *)b);
+        case EquationElementRadical:
+          return constLiteralAddRadical((ConstLiteral *)a, (Radical *)b);
+        case EquationElementVariable:
+          return constLiteralAddVariable((ConstLiteral *)a, (Variable *)b);
+        case EquationElementEquation:
+          return constLiteralAddEquation((ConstLiteral *)a, (Equation *)b);
+      }
+    case EquationElementFraction:
+      switch(typeOfB)
+      {
+        case EquationElementIntegerLiteral:
+          return fractionAddIntegerLiteral((Fraction *)a, (IntegerLiteral *)b);
+        case EquationElementConstLiteral:
+          return fractionAddConstLiteral((Fraction *)a, (ConstLiteral *)b);
+        case EquationElementFraction:
+          return fractionAddFraction((Fraction *)a, (Fraction *)b);
+        case EquationElementRadical:
+          return fractionAddRadical((Fraction *)a, (Radical *)b);
+        case EquationElementVariable:
+          return fractionAddVariable((Fraction *)a, (Variable *)b);
+        case EquationElementEquation:
+          return fractionAddEquation((Fraction *)a, (Equation *)b);
+      }
+    case EquationElementRadical:
+      switch(typeOfB)
+      {
+        case EquationElementIntegerLiteral:
+          return radicalAddIntegerLiteral((Radical *)a, (IntegerLiteral *)b);
+        case EquationElementConstLiteral:
+          return radicalAddConstLiteral((Radical *)a, (ConstLiteral *)b);
+        case EquationElementFraction:
+          return radicalAddFraction((Radical *)a, (Fraction *)b);
+        case EquationElementRadical:
+          return radicalAddRadical((Radical *)a, (Radical *)b);
+        case EquationElementVariable:
+          return radicalAddVariable((Radical *)a, (Variable *)b);
+        case EquationElementEquation:
+          return radicalAddEquation((Radical *)a, (Equation *)b);
+      }
+    case EquationElementVariable:
+      switch(typeOfB)
+      {
+        case EquationElementIntegerLiteral:
+          return variableAddIntegerLiteral((Variable *)a, (IntegerLiteral *)b);
+        case EquationElementConstLiteral:
+          return variableAddConstLiteral((Variable *)a, (ConstLiteral *)b);
+        case EquationElementFraction:
+          return variableAddFraction((Variable *)a, (Fraction *)b);
+        case EquationElementRadical:
+          return variableAddRadical((Variable *)a, (Radical *)b);
+        case EquationElementVariable:
+          return variableAddVariable((Variable *)a, (Variable *)b);
+        case EquationElementEquation:
+          return variableAddEquation((Variable *)a, (Equation *)b);
+      }
+    case EquationElementEquation:
+      switch(typeOfB)
+      {
+        case EquationElementIntegerLiteral:
+          return equationAddIntegerLiteral((Equation *)a, (IntegerLiteral *)b);
+        case EquationElementConstLiteral:
+          return equationAddConstLiteral((Equation *)a, (ConstLiteral *)b);
+        case EquationElementFraction:
+          return equationAddFraction((Equation *)a, (Fraction *)b);
+        case EquationElementRadical:
+          return equationAddRadical((Equation *)a, (Radical *)b);
+        case EquationElementVariable:
+          return equationAddVariable((Equation *)a, (Variable *)b);
+        case EquationElementEquation:
+          return equationAddEquation((Equation *)a, (Equation *)b);
+      }
+  }
+}
+EquationElementHeader *equationElementHeaderMultiplyEquationElementHeader(EquationElementHeader *a, EquationElementHeader *b)
+{
+  EquationElement typeOfA = typeOfHeader(a);
+  EquationElement typeOfB = typeOfHeader(b);
+
+  
+  switch(typeOfA)
+  {
+    case EquationElementIntegerLiteral:
+      switch(typeOfB)
+      {
+        case EquationElementIntegerLiteral:
+          return integerLiteralMultiplyIntegerLiteral((IntegerLiteral *)a, (IntegerLiteral *)b);
+        case EquationElementConstLiteral:
+          return integerLiteralMultiplyConstLiteral((IntegerLiteral *)a, (ConstLiteral *)b);
+        case EquationElementFraction:
+          return integerLiteralMultiplyFraction((IntegerLiteral *)a, (Fraction *)b);
+        case EquationElementRadical:
+          return integerLiteralMultiplyRadical((IntegerLiteral *)a, (Radical *)b);
+        case EquationElementVariable:
+          return integerLiteralMultiplyVariable((IntegerLiteral *)a, (Variable *)b);
+        case EquationElementEquation:
+          return integerLiteralMultiplyEquation((IntegerLiteral *)a, (Equation *)b);
+      }
+    case EquationElementConstLiteral:
+      switch(typeOfB)
+      {
+        case EquationElementIntegerLiteral:
+          return constLiteralMultiplyIntegerLiteral((ConstLiteral *)a, (IntegerLiteral *)b);
+        case EquationElementConstLiteral:
+          return constLiteralMultiplyConstLiteral((ConstLiteral *)a, (ConstLiteral *)b);
+        case EquationElementFraction:
+          return constLiteralMultiplyFraction((ConstLiteral *)a, (Fraction *)b);
+        case EquationElementRadical:
+          return constLiteralMultiplyRadical((ConstLiteral *)a, (Radical *)b);
+        case EquationElementVariable:
+          return constLiteralMultiplyVariable((ConstLiteral *)a, (Variable *)b);
+        case EquationElementEquation:
+          return constLiteralMultiplyEquation((ConstLiteral *)a, (Equation *)b);
+      }
+    case EquationElementFraction:
+      switch(typeOfB)
+      {
+        case EquationElementIntegerLiteral:
+          return fractionMultiplyIntegerLiteral((Fraction *)a, (IntegerLiteral *)b);
+        case EquationElementConstLiteral:
+          return fractionMultiplyConstLiteral((Fraction *)a, (ConstLiteral *)b);
+        case EquationElementFraction:
+          return fractionMultiplyFraction((Fraction *)a, (Fraction *)b);
+        case EquationElementRadical:
+          return fractionMultiplyRadical((Fraction *)a, (Radical *)b);
+        case EquationElementVariable:
+          return fractionMultiplyVariable((Fraction *)a, (Variable *)b);
+        case EquationElementEquation:
+          return fractionMultiplyEquation((Fraction *)a, (Equation *)b);
+      }
+    case EquationElementRadical:
+      switch(typeOfB)
+      {
+        case EquationElementIntegerLiteral:
+          return radicalMultiplyIntegerLiteral((Radical *)a, (IntegerLiteral *)b);
+        case EquationElementConstLiteral:
+          return radicalMultiplyConstLiteral((Radical *)a, (ConstLiteral *)b);
+        case EquationElementFraction:
+          return radicalMultiplyFraction((Radical *)a, (Fraction *)b);
+        case EquationElementRadical:
+          return radicalMultiplyRadical((Radical *)a, (Radical *)b);
+        case EquationElementVariable:
+          return radicalMultiplyVariable((Radical *)a, (Variable *)b);
+        case EquationElementEquation:
+          return radicalMultiplyEquation((Radical *)a, (Equation *)b);
+      }
+    case EquationElementVariable:
+      switch(typeOfB)
+      {
+        case EquationElementIntegerLiteral:
+          return variableMultiplyIntegerLiteral((Variable *)a, (IntegerLiteral *)b);
+        case EquationElementConstLiteral:
+          return variableMultiplyConstLiteral((Variable *)a, (ConstLiteral *)b);
+        case EquationElementFraction:
+          return variableMultiplyFraction((Variable *)a, (Fraction *)b);
+        case EquationElementRadical:
+          return variableMultiplyRadical((Variable *)a, (Radical *)b);
+        case EquationElementVariable:
+          return variableMultiplyVariable((Variable *)a, (Variable *)b);
+        case EquationElementEquation:
+          return variableMultiplyEquation((Variable *)a, (Equation *)b);
+      }
+    case EquationElementEquation:
+      switch(typeOfB)
+      {
+        case EquationElementIntegerLiteral:
+          return equationMultiplyIntegerLiteral((Equation *)a, (IntegerLiteral *)b);
+        case EquationElementConstLiteral:
+          return equationMultiplyConstLiteral((Equation *)a, (ConstLiteral *)b);
+        case EquationElementFraction:
+          return equationMultiplyFraction((Equation *)a, (Fraction *)b);
+        case EquationElementRadical:
+          return equationMultiplyRadical((Equation *)a, (Radical *)b);
+        case EquationElementVariable:
+          return equationMultiplyVariable((Equation *)a, (Variable *)b);
+        case EquationElementEquation:
+          return equationMultiplyEquation((Equation *)a, (Equation *)b);
+      }
+  }
+}
+EquationElementHeader *equationElementHeaderSubtractEquationElementHeader(EquationElementHeader *a, EquationElementHeader *b);
+EquationElementHeader *equationElementHeaderDivideEquationElementHeader(EquationElementHeader *a, EquationElementHeader *b);
+EquationElementHeader *equationElementHeaderPowerEquationElementHeader(EquationElementHeader *a, EquationElementHeader *b);

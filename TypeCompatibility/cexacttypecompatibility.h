@@ -110,12 +110,40 @@ EquationElementHeader *constLiteralAddEquation(ConstLiteral *a, Equation *b)
   return (EquationElementHeader *)newEquation;
 }
 
-EquationElementHeader *fractionAddIntegerLiteral(Fraction *a, IntegerLiteral *b);
-EquationElementHeader *fractionAddConstLiteral(Fraction *a, ConstLiteral *b);
-EquationElementHeader *fractionAddFraction(Fraction *a, Fraction *b);
-EquationElementHeader *fractionAddRadical(Fraction *a, Radical *b);
-EquationElementHeader *fractionAddVariable(Fraction *a, Variable *b);
-EquationElementHeader *fractionAddEquation(Fraction *a, Equation *b);
+EquationElementHeader *fractionAddIntegerLiteral(Fraction *a, IntegerLiteral *b)
+{
+  return integerLiteralAddFraction(b, a);
+}
+EquationElementHeader *fractionAddConstLiteral(Fraction *a, ConstLiteral *b)
+{
+  return constLiteralAddFraction(b, a);
+}
+EquationElementHeader *fractionAddFraction(Fraction *a, Fraction *b)
+{
+  EquationElementHeader *newNumeratorA = equationElementHeaderMultiplyEquationElementHeader(a->numerator, b->denominator);
+  EquationElementHeader *newNumeratorB = equationElementHeaderMultiplyEquationElementHeader(b->numerator, a->denominator);
+  EquationElementHeader *newNumerator = equationElementHeaderAddEquationElementHeader(newNumeratorA, newNumeratorB);
+  EquationElementHeader *newDenominator = equationElementHeaderMultiplyEquationElementHeader(a->denominator, b->denominator);
+  return fractionCreate(newNumerator, newDenominator);
+}
+EquationElementHeader *fractionAddRadical(Fraction *a, Radical *b)
+{
+  EquationElementHeader *newNumerator = equationElementHeaderMultiplyEquationElementHeader((EquationElementHeader *)b, a->denominator);
+  newNumerator = equationElementHeaderAddEquationElementHeader(newNumerator, a->numerator);
+  return (EquationElementHeader *)fractionCreate(newNumerator, equationElementHeaderCopy(a->denominator));
+}
+EquationElementHeader *fractionAddVariable(Fraction *a, Variable *b)
+{
+  EquationElementHeader *newNumerator = equationElementHeaderMultiplyEquationElementHeader((EquationElementHeader *)b, a->denominator);
+  newNumerator = equationElementHeaderAddEquationElementHeader(newNumerator, a->numerator);
+  return (EquationElementHeader *)fractionCreate(newNumerator, equationElementHeaderCopy(a->denominator));
+}
+EquationElementHeader *fractionAddEquation(Fraction *a, Equation *b)
+{
+  EquationElementHeader *newNumerator = equationElementHeaderMultiplyEquationElementHeader((EquationElementHeader *)b, a->denominator);
+  newNumerator = equationElementHeaderAddEquationElementHeader(newNumerator, a->numerator);
+  return (EquationElementHeader *)fractionCreate(newNumerator, equationElementHeaderCopy(a->denominator));
+}
 
 EquationElementHeader *radicalAddIntegerLiteral(Radical *a, IntegerLiteral *b);
 EquationElementHeader *radicalAddConstLiteral(Radical *a, ConstLiteral *b);

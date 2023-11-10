@@ -45,23 +45,11 @@ EquationElementHeader *integerLiteralAddVariable(IntegerLiteral *a, Variable *b)
 EquationElementHeader *integerLiteralAddEquation(IntegerLiteral *a, Equation *b)
 {
   Equation *newEquation = equationCopy(b);
-  EquationElementHeader **currentHeader = newEquation->equationHeaders;
-  while(typeOfHeader(*currentHeader) != EquationElementEndOfEquation)
-  {
-    if((*currentHeader)->equationElementType == EquationElementIntegerLiteral && isTerm(currentHeader))
-    {
-      int currentHeaderValue = ((IntegerLiteral *)(*currentHeader))->value; 
-      IntegerLiteral *newInteger = integerLiteralCreate(currentHeaderValue + a->value);
-      *currentHeader = (EquationElementHeader *)newInteger;
-      return (EquationElementHeader *)newEquation;
-    }
-    currentHeader++;
-  }
   newEquation->equationHeaders = (EquationElementHeader **)realloc(newEquation->equationHeaders, newEquation->lengthOfEquation + 3);
   (newEquation->equationHeaders)[newEquation->lengthOfEquation] = (EquationElementHeader *)binaryOperationElementCreate(OperationAdd);
   (newEquation->equationHeaders)[newEquation->lengthOfEquation + 1] = (EquationElementHeader *)integerLiteralCopy(a);
   EquationElementHeader endOfEquation = equationElementHeaderCreate(EquationElementEndOfEquation);
-  (newEquation->equationHeaders)[newEquation->lengthOfEquation + 2] = &endOfEquation;
+  *((newEquation->equationHeaders)[newEquation->lengthOfEquation + 2]) = endOfEquation;
   return (EquationElementHeader *)newEquation;
 }
 
@@ -106,7 +94,7 @@ EquationElementHeader *constLiteralAddEquation(ConstLiteral *a, Equation *b)
   (newEquation->equationHeaders)[newEquation->lengthOfEquation] = (EquationElementHeader *)binaryOperationElementCreate(OperationAdd);
   (newEquation->equationHeaders)[newEquation->lengthOfEquation + 1] = (EquationElementHeader *)constLiteralCopy(a);
   EquationElementHeader endOfEquation = equationElementHeaderCreate(EquationElementEndOfEquation);
-  (newEquation->equationHeaders)[newEquation->lengthOfEquation + 2] = &endOfEquation;
+  *((newEquation->equationHeaders)[newEquation->lengthOfEquation + 2]) = endOfEquation;
   return (EquationElementHeader *)newEquation;
 }
 
@@ -145,26 +133,104 @@ EquationElementHeader *fractionAddEquation(Fraction *a, Equation *b)
   return (EquationElementHeader *)fractionCreate(newNumerator, equationElementHeaderCopy(a->denominator));
 }
 
-EquationElementHeader *radicalAddIntegerLiteral(Radical *a, IntegerLiteral *b);
-EquationElementHeader *radicalAddConstLiteral(Radical *a, ConstLiteral *b);
-EquationElementHeader *radicalAddFraction(Radical *a, Fraction *b);
-EquationElementHeader *radicalAddRadical(Radical *a, Radical *b);
-EquationElementHeader *radicalAddVariable(Radical *a, Variable *b);
-EquationElementHeader *radicalAddEquation(Radical *a, Equation *b);
+EquationElementHeader *radicalAddIntegerLiteral(Radical *a, IntegerLiteral *b)
+{
+  return integerLiteralAddRadical(b, a);
+}
+EquationElementHeader *radicalAddConstLiteral(Radical *a, ConstLiteral *b)
+{
+  return constLiteralAddRadical(b, a);
+}
+EquationElementHeader *radicalAddFraction(Radical *a, Fraction *b)
+{
+  return fractionAddRadical(b, a);
+}
+EquationElementHeader *radicalAddRadical(Radical *a, Radical *b)
+{
+  Equation *newEquation = equationCreate(3);
+  (newEquation->equationHeaders)[0] = (EquationElementHeader *)radicalCopy(a);
+  (newEquation->equationHeaders)[1] = (EquationElementHeader *)binaryOperationElementCreate(OperationAdd);
+  (newEquation->equationHeaders)[2] = (EquationElementHeader *)radicalCopy(b);
+  return (EquationElementHeader *)newEquation;
+}
+EquationElementHeader *radicalAddVariable(Radical *a, Variable *b)
+{
+  Equation *newEquation = equationCreate(3);
+  (newEquation->equationHeaders)[0] = (EquationElementHeader *)constLiteralCopy(a);
+  (newEquation->equationHeaders)[1] = (EquationElementHeader *)binaryOperationElementCreate(OperationAdd);
+  (newEquation->equationHeaders)[2] = (EquationElementHeader *)variableCopy(b);
+  return (EquationElementHeader *)newEquation;
+}
+EquationElementHeader *radicalAddEquation(Radical *a, Equation *b)
+{
+  Equation *newEquation = equationCopy(b);
+  newEquation->equationHeaders = (EquationElementHeader **)realloc(newEquation->equationHeaders, newEquation->lengthOfEquation + 3);
+  (newEquation->equationHeaders)[newEquation->lengthOfEquation] = (EquationElementHeader *)binaryOperationElementCreate(OperationAdd);
+  (newEquation->equationHeaders)[newEquation->lengthOfEquation + 1] = (EquationElementHeader *)radicalLiteralCopy(a);
+  EquationElementHeader endOfEquation = equationElementHeaderCreate(EquationElementEndOfEquation);
+  *((newEquation->equationHeaders)[newEquation->lengthOfEquation + 2]) = endOfEquation;
+  return (EquationElementHeader *)newEquation;
+}
 
-EquationElementHeader *variableAddIntegerLiteral(Variable *a, IntegerLiteral *b);
-EquationElementHeader *variableAddConstLiteral(Variable *a, ConstLiteral *b);
-EquationElementHeader *variableAddFraction(Variable *a, Fraction *b);
-EquationElementHeader *variableAddRadical(Variable *a, Radical *b);
-EquationElementHeader *variableAddVariable(Variable *a, Variable *b);
-EquationElementHeader *variableAddEquation(Variable *a, Equation *b);
+EquationElementHeader *variableAddIntegerLiteral(Variable *a, IntegerLiteral *b)
+{
+  return integerLiteralAddVariable(b, a);
+}
+EquationElementHeader *variableAddConstLiteral(Variable *a, ConstLiteral *b)
+{
+  return constLiteralAddVariable(b, a);
+}
+EquationElementHeader *variableAddFraction(Variable *a, Fraction *b)
+{
+  return fractionAddVariable(b, a);
+}
+EquationElementHeader *variableAddRadical(Variable *a, Radical *b)
+{
+  return radicalAddVariable(b, a);
+}
+EquationElementHeader *variableAddVariable(Variable *a, Variable *b)
+{
+  Equation *newEquation = equationCreate(3);
+  (newEquation->equationHeaders)[0] = (EquationElementHeader *)variableCopy(a);
+  (newEquation->equationHeaders)[1] = (EquationElementHeader *)binaryOperationElementCreate(OperationAdd);
+  (newEquation->equationHeaders)[2] = (EquationElementHeader *)variableCopy(b);
+  return (EquationElementHeader *)newEquation;
+}
+EquationElementHeader *variableAddEquation(Variable *a, Equation *b)
+{
+  Equation *newEquation = equationCopy(b);
+  newEquation->equationHeaders = (EquationElementHeader **)realloc(newEquation->equationHeaders, newEquation->lengthOfEquation + 3);
+  (newEquation->equationHeaders)[newEquation->lengthOfEquation] = (EquationElementHeader *)binaryOperationElementCreate(OperationAdd);
+  (newEquation->equationHeaders)[newEquation->lengthOfEquation + 1] = (EquationElementHeader *)variableCopy(a);
+  EquationElementHeader endOfEquation = equationElementHeaderCreate(EquationElementEndOfEquation);
+  *((newEquation->equationHeaders)[newEquation->lengthOfEquation + 2]) = endOfEquation;
+  return (EquationElementHeader *)newEquation;
+}
 
-EquationElementHeader *equationAddIntegerLiteral(Equation *a, IntegerLiteral *b);
-EquationElementHeader *equationAddConstLiteral(Equation *a, ConstLiteral *b);
-EquationElementHeader *equationAddFraction(Equation *a, Fraction *b);
-EquationElementHeader *equationAddRadical(Equation *a, Radical *b);
-EquationElementHeader *equationAddVariable(Equation *a, Variable *b);
-EquationElementHeader *equationAddEquation(Equation *a, Equation *b);
+EquationElementHeader *equationAddIntegerLiteral(Equation *a, IntegerLiteral *b)
+{
+  return integerLiteralAddEquation(b, a);
+}
+EquationElementHeader *equationAddConstLiteral(Equation *a, ConstLiteral *b)
+{
+  return constLiteralAddEquation(b, a);
+}
+EquationElementHeader *equationAddFraction(Equation *a, Fraction *b)
+{
+  return fractionAddEquation(b, a);
+}
+EquationElementHeader *equationAddRadical(Equation *a, Radical *b)
+{
+  return radicalAddEquation(b, a);
+}
+EquationElementHeader *equationAddVariable(Equation *a, Variable *b)
+{
+  return variableAddEquation(b, a);
+}
+EquationElementHeader *equationAddEquation(Equation *a, Equation *b)
+{
+  
+}
 
 
 

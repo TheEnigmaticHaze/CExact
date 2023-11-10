@@ -236,7 +236,7 @@ typedef enum
   VariableNameB,
   VariableNameC,
   VariableNameN,
-  VaribaleNameM,
+  VariableNameM,
   VariableNameT,
   VariableNameX,
   VariableNameY,
@@ -361,26 +361,3 @@ EquationElement typeOfHeader(EquationElementHeader *header)
   return header->equationElementType;
 }
 
-
-
-typedef enum
-{
-  IsTermFalse,
-  IsTermTrue
-} IsTermBool;
-
-IsTermBool isTerm(EquationElementHeader **headerOfEquation)
-{
-  EquationElementHeader *previousHeader = *(headerOfEquation - 1);
-  EquationElementHeader *nextHeader = *(headerOfEquation + 1);
-
-  unsigned char hasAdditionOnBothSides = typeOfHeader(previousHeader) == EquationElementBinaryOperation;
-  hasAdditionOnBothSides &= typeOfHeader(nextHeader) == EquationElementBinaryOperation;
-
-  if(hasAdditionOnBothSides)
-  {
-    hasAdditionOnBothSides &= ((BinaryOperationElement *)previousHeader)->operation == OperationAdd;
-    hasAdditionOnBothSides &= ((BinaryOperationElement *)nextHeader)->operation == OperationAdd;
-  }
-  return (hasAdditionOnBothSides ? IsTermTrue : IsTermFalse);
-}

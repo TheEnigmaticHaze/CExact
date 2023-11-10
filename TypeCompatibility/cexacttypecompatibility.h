@@ -229,7 +229,25 @@ EquationElementHeader *equationAddVariable(Equation *a, Variable *b)
 }
 EquationElementHeader *equationAddEquation(Equation *a, Equation *b)
 {
-  
+  Equation *newEquation = equationCreate(a->lengthOfEquation + b->lengthOfEquation + 1);
+  EquationElementHeader **currentWriteHeader = newEquation->equationHeaders;
+  EquationElementHeader **currentReadHeader = a->equationHeaders;
+  while((*currentReadHeader)->equationElementType != EquationElementEndOfEquation)
+  {
+    *currentWriteHeader = equationElementHeaderCopy(*currentReadHeader);
+    currentReadHeader++;
+    currentWriteHeader++;
+  }
+  *currentWriteHeader = binaryOperationElementCreate(OperationAdd);
+  currentWriteHeader++;
+  currentReadHeader = b->equationHeaders;
+  while((*currentReadHeader)->equationElementType != EquationElementEndOfEquation)
+  {
+    *currentWriteHeader = equationElementHeaderCopy(*currentReadHeader);
+    currentReadHeader++;
+    currentWriteHeader++;
+  }
+  return newEquation;
 }
 
 

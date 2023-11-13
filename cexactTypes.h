@@ -11,7 +11,8 @@ typedef enum
   EquationElementBinaryOperation,
   EquationElementFunction,
   EquationElementEndOfEquation,
-  EquationElementSkipMe
+  EquationElementSkipMe,
+  EquationElementError
 } EquationElement;
 
 typedef struct

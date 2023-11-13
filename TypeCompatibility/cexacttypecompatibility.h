@@ -252,12 +252,44 @@ EquationElementHeader *equationAddEquation(Equation *a, Equation *b)
 
 
 
-EquationElementHeader *integerLiteralMultiplyIntegerLiteral(IntegerLiteral *a, IntegerLiteral *b);
-EquationElementHeader *integerLiteralMultiplyConstLiteral(IntegerLiteral *a, ConstLiteral *b);
-EquationElementHeader *integerLiteralMultiplyFraction(IntegerLiteral *a, Fraction *b);
-EquationElementHeader *integerLiteralMultiplyRadical(IntegerLiteral *a, Radical *b);
-EquationElementHeader *integerLiteralMultiplyVariable(IntegerLiteral *a, Variable *b);
-EquationElementHeader *integerLiteralMultiplyEquation(IntegerLiteral *a, Equation *b);
+EquationElementHeader *integerLiteralMultiplyIntegerLiteral(IntegerLiteral *a, IntegerLiteral *b)
+{
+  return integerLiteralCreate(a->value * b->value);
+}
+EquationElementHeader *integerLiteralMultiplyConstLiteral(IntegerLiteral *a, ConstLiteral *b)
+{
+  Equation *newEquation = equationCreate(3);
+  (newEquation->equationHeaders)[0] = integerLiteralCopy(a);
+  (newEquation->equationHeaders)[1] = binaryOperationElementCreate(OperationMultiply);
+  (newEquation->equationHeaders)[2] = constLiteralCopy(b);
+  return (EquationElementHeader *)newEquation;
+}
+EquationElementHeader *integerLiteralMultiplyFraction(IntegerLiteral *a, Fraction *b)
+{
+  EquationElementHeader *newNumerator = equationElementHeaderMultiplyEquationElementHeader((EquationElementHeader *)a, b->numerator);
+  return fractionCreate(newNumerator, equationElementHeaderCopy(b->denominator));
+}
+EquationElementHeader *integerLiteralMultiplyRadical(IntegerLiteral *a, Radical *b)
+{
+  Equation *newEquation = equationCreate(3);
+  (newEquation->equationHeaders)[0] = integerLiteralCopy(a);
+  (newEquation->equationHeaders)[1] = binaryOperationElementCreate(OperationMultiply);
+  (newEquation->equationHeaders)[2] = radicalCopy(b);
+  return (EquationElementHeader *)newEquation;
+}
+EquationElementHeader *integerLiteralMultiplyVariable(IntegerLiteral *a, Variable *b)
+{
+  Equation *newEquation = equationCreate(3);
+  (newEquation->equationHeaders)[0] = integerLiteralCopy(a);
+  (newEquation->equationHeaders)[1] = binaryOperationElementCreate(OperationMultiply);
+  (newEquation->equationHeaders)[2] = variableCopy(b);
+  return (EquationElementHeader *)newEquation;
+}
+EquationElementHeader *integerLiteralMultiplyEquation(IntegerLiteral *a, Equation *b)
+{
+  Equation *newEquation = equationCreate(b->lengthOfEquation);
+  
+}
 
 EquationElementHeader *constLiteralMultiplyIntegerLiteral(ConstLiteral *a, IntegerLiteral *b);
 EquationElementHeader *constLiteralMultiplyConstLiteral(ConstLiteral *a, ConstLiteral *b);
@@ -539,6 +571,10 @@ EquationElementHeader *equationElementHeaderAddEquationElementHeader(EquationEle
         case EquationElementEquation:
           return equationAddEquation((Equation *)a, (Equation *)b);
       }
+    default:
+      EquationElementHeader *oopsies = (EquationElementHeader *)malloc(sizeof(EquationElementHeader));
+      *oopsies = equationElementHeaderCreate(EquationElementError);
+      return oopsies;
   }
 }
 EquationElementHeader *equationElementHeaderMultiplyEquationElementHeader(EquationElementHeader *a, EquationElementHeader *b)
@@ -645,8 +681,13 @@ EquationElementHeader *equationElementHeaderMultiplyEquationElementHeader(Equati
         case EquationElementEquation:
           return equationMultiplyEquation((Equation *)a, (Equation *)b);
       }
+    default:
+      EquationElementHeader *oopsies = (EquationElementHeader *)malloc(sizeof(EquationElementHeader));
+      *oopsies = equationElementHeaderCreate(EquationElementError);
+      return oopsies;
   }
 }
+
 EquationElementHeader *equationElementHeaderSubtractEquationElementHeader(EquationElementHeader *a, EquationElementHeader *b);
 EquationElementHeader *equationElementHeaderDivideEquationElementHeader(EquationElementHeader *a, EquationElementHeader *b);
 EquationElementHeader *equationElementHeaderPowerEquationElementHeader(EquationElementHeader *a, EquationElementHeader *b);

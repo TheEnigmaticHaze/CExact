@@ -112,7 +112,7 @@ EquationElementHeader *fractionAddFraction(Fraction *a, Fraction *b)
   EquationElementHeader *newNumeratorB = equationElementHeaderMultiplyEquationElementHeader(b->numerator, a->denominator);
   EquationElementHeader *newNumerator = equationElementHeaderAddEquationElementHeader(newNumeratorA, newNumeratorB);
   EquationElementHeader *newDenominator = equationElementHeaderMultiplyEquationElementHeader(a->denominator, b->denominator);
-  return fractionCreate(newNumerator, newDenominator);
+  return (EquationElementHeader *)fractionCreate(newNumerator, newDenominator);
 }
 EquationElementHeader *fractionAddRadical(Fraction *a, Radical *b)
 {
@@ -156,7 +156,7 @@ EquationElementHeader *radicalAddRadical(Radical *a, Radical *b)
 EquationElementHeader *radicalAddVariable(Radical *a, Variable *b)
 {
   Equation *newEquation = equationCreate(3);
-  (newEquation->equationHeaders)[0] = (EquationElementHeader *)constLiteralCopy(a);
+  (newEquation->equationHeaders)[0] = (EquationElementHeader *)radicalCopy(a);
   (newEquation->equationHeaders)[1] = (EquationElementHeader *)binaryOperationElementCreate(OperationAdd);
   (newEquation->equationHeaders)[2] = (EquationElementHeader *)variableCopy(b);
   return (EquationElementHeader *)newEquation;
@@ -166,7 +166,7 @@ EquationElementHeader *radicalAddEquation(Radical *a, Equation *b)
   Equation *newEquation = equationCopy(b);
   newEquation->equationHeaders = (EquationElementHeader **)realloc(newEquation->equationHeaders, newEquation->lengthOfEquation + 3);
   (newEquation->equationHeaders)[newEquation->lengthOfEquation] = (EquationElementHeader *)binaryOperationElementCreate(OperationAdd);
-  (newEquation->equationHeaders)[newEquation->lengthOfEquation + 1] = (EquationElementHeader *)radicalLiteralCopy(a);
+  (newEquation->equationHeaders)[newEquation->lengthOfEquation + 1] = (EquationElementHeader *)radicalCopy(a);
   EquationElementHeader endOfEquation = equationElementHeaderCreate(EquationElementEndOfEquation);
   *((newEquation->equationHeaders)[newEquation->lengthOfEquation + 2]) = endOfEquation;
   return (EquationElementHeader *)newEquation;
@@ -238,7 +238,7 @@ EquationElementHeader *equationAddEquation(Equation *a, Equation *b)
     currentReadHeader++;
     currentWriteHeader++;
   }
-  *currentWriteHeader = binaryOperationElementCreate(OperationAdd);
+  *currentWriteHeader = (EquationElementHeader *)binaryOperationElementCreate(OperationAdd);
   currentWriteHeader++;
   currentReadHeader = b->equationHeaders;
   while((*currentReadHeader)->equationElementType != EquationElementEndOfEquation)
@@ -247,48 +247,51 @@ EquationElementHeader *equationAddEquation(Equation *a, Equation *b)
     currentReadHeader++;
     currentWriteHeader++;
   }
-  return newEquation;
+  return (EquationElementHeader *)newEquation;
 }
 
 
 
 EquationElementHeader *integerLiteralMultiplyIntegerLiteral(IntegerLiteral *a, IntegerLiteral *b)
 {
-  return integerLiteralCreate(a->value * b->value);
+  return (EquationElementHeader *)integerLiteralCreate(a->value * b->value);
 }
 EquationElementHeader *integerLiteralMultiplyConstLiteral(IntegerLiteral *a, ConstLiteral *b)
 {
   Equation *newEquation = equationCreate(3);
-  (newEquation->equationHeaders)[0] = integerLiteralCopy(a);
-  (newEquation->equationHeaders)[1] = binaryOperationElementCreate(OperationMultiply);
-  (newEquation->equationHeaders)[2] = constLiteralCopy(b);
+  (newEquation->equationHeaders)[0] = (EquationElementHeader *)integerLiteralCopy(a);
+  (newEquation->equationHeaders)[1] = (EquationElementHeader *)binaryOperationElementCreate(OperationMultiply);
+  (newEquation->equationHeaders)[2] = (EquationElementHeader *)constLiteralCopy(b);
   return (EquationElementHeader *)newEquation;
 }
 EquationElementHeader *integerLiteralMultiplyFraction(IntegerLiteral *a, Fraction *b)
 {
   EquationElementHeader *newNumerator = equationElementHeaderMultiplyEquationElementHeader((EquationElementHeader *)a, b->numerator);
-  return fractionCreate(newNumerator, equationElementHeaderCopy(b->denominator));
+  return (EquationElementHeader *)fractionCreate(newNumerator, equationElementHeaderCopy(b->denominator));
 }
 EquationElementHeader *integerLiteralMultiplyRadical(IntegerLiteral *a, Radical *b)
 {
   Equation *newEquation = equationCreate(3);
-  (newEquation->equationHeaders)[0] = integerLiteralCopy(a);
-  (newEquation->equationHeaders)[1] = binaryOperationElementCreate(OperationMultiply);
-  (newEquation->equationHeaders)[2] = radicalCopy(b);
+  (newEquation->equationHeaders)[0] = (EquationElementHeader *)integerLiteralCopy(a);
+  (newEquation->equationHeaders)[1] = (EquationElementHeader *)binaryOperationElementCreate(OperationMultiply);
+  (newEquation->equationHeaders)[2] = (EquationElementHeader *)radicalCopy(b);
   return (EquationElementHeader *)newEquation;
 }
 EquationElementHeader *integerLiteralMultiplyVariable(IntegerLiteral *a, Variable *b)
 {
   Equation *newEquation = equationCreate(3);
-  (newEquation->equationHeaders)[0] = integerLiteralCopy(a);
-  (newEquation->equationHeaders)[1] = binaryOperationElementCreate(OperationMultiply);
-  (newEquation->equationHeaders)[2] = variableCopy(b);
+  (newEquation->equationHeaders)[0] = (EquationElementHeader *)integerLiteralCopy(a);
+  (newEquation->equationHeaders)[1] = (EquationElementHeader *)binaryOperationElementCreate(OperationMultiply);
+  (newEquation->equationHeaders)[2] = (EquationElementHeader *)variableCopy(b);
   return (EquationElementHeader *)newEquation;
 }
 EquationElementHeader *integerLiteralMultiplyEquation(IntegerLiteral *a, Equation *b)
 {
-  Equation *newEquation = equationCreate(b->lengthOfEquation);
-  
+  Equation *newEquation = equationCreate(3);
+  (newEquation->equationHeaders)[0] = (EquationElementHeader *)integerLiteralCopy(a);
+  (newEquation->equationHeaders)[1] = (EquationElementHeader *)binaryOperationElementCreate(OperationMultiply);
+  (newEquation->equationHeaders)[2] = (EquationElementHeader *)equationCopy(b);
+  return (EquationElementHeader *)newEquation;
 }
 
 EquationElementHeader *constLiteralMultiplyIntegerLiteral(ConstLiteral *a, IntegerLiteral *b);

@@ -403,19 +403,67 @@ EquationElementHeader *radicalMultiplyEquation(Radical *a, Equation *b)
   return (EquationElementHeader *)newEquation;
 }
 
-EquationElementHeader *variableMultiplyIntegerLiteral(Variable *a, IntegerLiteral *b);
-EquationElementHeader *variableMultiplyConstLiteral(Variable *a, ConstLiteral *b);
-EquationElementHeader *variableMultiplyFraction(Variable *a, Fraction *b);
-EquationElementHeader *variableMultiplyRadical(Variable *a, Radical *b);
-EquationElementHeader *variableMultiplyVariable(Variable *a, Variable *b);
-EquationElementHeader *variableMultiplyEquation(Variable *a, Equation *b);
+EquationElementHeader *variableMultiplyIntegerLiteral(Variable *a, IntegerLiteral *b)
+{
+  return integerLiteralMultiplyVariable(b, a);
+}
+EquationElementHeader *variableMultiplyConstLiteral(Variable *a, ConstLiteral *b)
+{
+  return constLiteralMultiplyVariable(b, a);
+}
+EquationElementHeader *variableMultiplyFraction(Variable *a, Fraction *b)
+{
+  return fractionMultiplyVariable(b, a);
+}
+EquationElementHeader *variableMultiplyRadical(Variable *a, Radical *b)
+{
+  return radicalMultiplyVariable(b, a);
+}
+EquationElementHeader *variableMultiplyVariable(Variable *a, Variable *b)
+{
+  Equation *newEquation = equationCreate(3);
+  (newEquation->equationHeaders)[0] = (EquationElementHeader *)variableCopy(a);
+  (newEquation->equationHeaders)[1] = (EquationElementHeader *)binaryOperationElementCreate(OperationMultiply);
+  (newEquation->equationHeaders)[2] = (EquationElementHeader *)variableCopy(b);
+  return (EquationElementHeader *)newEquation;
+}
+EquationElementHeader *variableMultiplyEquation(Variable *a, Equation *b)
+{
+  Equation *newEquation = equationCreate(3);
+  (newEquation->equationHeaders)[0] = (EquationElementHeader *)variableCopy(a);
+  (newEquation->equationHeaders)[1] = (EquationElementHeader *)binaryOperationElementCreate(OperationMultiply);
+  (newEquation->equationHeaders)[2] = (EquationElementHeader *)equationCopy(b);
+  return (EquationElementHeader *)newEquation;
+}
 
-EquationElementHeader *equationMultiplyIntegerLiteral(Equation *a, IntegerLiteral *b);
-EquationElementHeader *equationMultiplyConstLiteral(Equation *a, ConstLiteral *b);
-EquationElementHeader *equationMultiplyFraction(Equation *a, Fraction *b);
-EquationElementHeader *equationMultiplyRadical(Equation *a, Radical *b);
-EquationElementHeader *equationMultiplyVariable(Equation *a, Variable *b);
-EquationElementHeader *equationMultiplyEquation(Equation *a, Equation *b);
+EquationElementHeader *equationMultiplyIntegerLiteral(Equation *a, IntegerLiteral *b)
+{
+  return integerLiteralMultiplyEquation(b, a);
+}
+EquationElementHeader *equationMultiplyConstLiteral(Equation *a, ConstLiteral *b)
+{
+  return constLiteralMultiplyEquation(b, a);
+}
+EquationElementHeader *equationMultiplyFraction(Equation *a, Fraction *b)
+{
+  return fractionMultiplyEquation(b, a);
+}
+EquationElementHeader *equationMultiplyRadical(Equation *a, Radical *b)
+{
+  return radicalMultiplyEquation(b, a);
+}
+EquationElementHeader *equationMultiplyVariable(Equation *a, Variable *b)
+{
+  return variableMultiplyEquation(b, a);
+}
+EquationElementHeader *equationMultiplyEquation(Equation *a, Equation *b)
+{
+  Equation *newEquation = equationCreate(3);
+  (newEquation->equationHeaders)[0] = (EquationElementHeader *)equationCopy(a);
+  (newEquation->equationHeaders)[1] = (EquationElementHeader *)binaryOperationElementCreate(OperationMultiply);
+  (newEquation->equationHeaders)[2] = (EquationElementHeader *)equationCopy(b);
+  return (EquationElementHeader *)newEquation;
+}
 
 
 

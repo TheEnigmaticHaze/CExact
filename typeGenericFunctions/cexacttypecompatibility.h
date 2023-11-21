@@ -485,16 +485,73 @@ EquationElementHeader *integerLiteralSubtractFraction(IntegerLiteral *a, Fractio
   newNumerator = equationElementHeaderSubtractEquationElementHeader(newNumerator, b->numerator);
   return (EquationElementHeader *)fractionCreate(newNumerator, equationElementHeaderCopy(b->denominator));
 }
-EquationElementHeader *integerLiteralSubtractRadical(IntegerLiteral *a, Radical *b);
-EquationElementHeader *integerLiteralSubtractVariable(IntegerLiteral *a, Variable *b);
-EquationElementHeader *integerLiteralSubtractEquation(IntegerLiteral *a, Equation *b);
+EquationElementHeader *integerLiteralSubtractRadical(IntegerLiteral *a, Radical *b)
+{
+  Equation *newEquation = equationCreate(3);
+  (newEquation->equationHeaders)[0] = (EquationElementHeader *)integerLiteralCopy(a);
+  (newEquation->equationHeaders)[1] = (EquationElementHeader *)binaryOperationElementCreate(OperationSubtract);
+  (newEquation->equationHeaders)[2] = (EquationElementHeader *)radicalCopy(b);
+  return (EquationElementHeader *)newEquation;
+}
+EquationElementHeader *integerLiteralSubtractVariable(IntegerLiteral *a, Variable *b)
+{
+  Equation *newEquation = equationCreate(3);
+  (newEquation->equationHeaders)[0] = (EquationElementHeader *)integerLiteralCopy(a);
+  (newEquation->equationHeaders)[1] = (EquationElementHeader *)binaryOperationElementCreate(OperationSubtract);
+  (newEquation->equationHeaders)[2] = (EquationElementHeader *)variableCopy(b);
+  return (EquationElementHeader *)newEquation;
+}
+EquationElementHeader *integerLiteralSubtractEquation(IntegerLiteral *a, Equation *b)
+{
+  Equation *newEquation = equationCreate(3);
+  (newEquation->equationHeaders)[0] = (EquationElementHeader *)integerLiteralCopy(a);
+  (newEquation->equationHeaders)[1] = (EquationElementHeader *)binaryOperationElementCreate(OperationSubtract);
+  (newEquation->equationHeaders)[2] = (EquationElementHeader *)equationCopy(b);
+  return (EquationElementHeader *)newEquation;
+}
 
-EquationElementHeader *constLiteralSubtractIntegerLiteral(ConstLiteral *a, IntegerLiteral *b);
-EquationElementHeader *constLiteralSubtractConstLiteral(ConstLiteral *a, ConstLiteral *b);
-EquationElementHeader *constLiteralSubtractFraction(ConstLiteral *a, Fraction *b);
-EquationElementHeader *constLiteralSubtractRadical(ConstLiteral *a, Radical *b);
-EquationElementHeader *constLiteralSubtractVariable(ConstLiteral *a, Variable *b);
-EquationElementHeader *constLiteralSubtractEquation(ConstLiteral *a, Equation *b);
+EquationElementHeader *constLiteralSubtractIntegerLiteral(ConstLiteral *a, IntegerLiteral *b)
+{
+  return integerLiteralSubtractConstLiteral(b, a);
+}
+EquationElementHeader *constLiteralSubtractConstLiteral(ConstLiteral *a, ConstLiteral *b)
+{
+  Equation *newEquation = equationCreate(3);
+  (newEquation->equationHeaders)[0] = (EquationElementHeader *)constLiteralCopy(a);
+  (newEquation->equationHeaders)[1] = (EquationElementHeader *)binaryOperationElementCreate(OperationSubtract);
+  (newEquation->equationHeaders)[2] = (EquationElementHeader *)constLiteralCopy(b);
+  return (EquationElementHeader *)newEquation;
+}
+EquationElementHeader *constLiteralSubtractFraction(ConstLiteral *a, Fraction *b)
+{
+  EquationElementHeader *newNumerator = equationElementHeaderMultiplyEquationElementHeader((EquationElementHeader *)a, b->denominator);
+  newNumerator = equationElementHeaderSubtractEquationElementHeader(newNumerator, b->numerator);
+  return (EquationElementHeader *)fractionCreate(newNumerator, equationElementHeaderCopy(b->denominator));
+}
+EquationElementHeader *constLiteralSubtractRadical(ConstLiteral *a, Radical *b)
+{
+  Equation *newEquation = equationCreate(3);
+  (newEquation->equationHeaders)[0] = (EquationElementHeader *)constLiteralCopy(a);
+  (newEquation->equationHeaders)[1] = (EquationElementHeader *)binaryOperationElementCreate(OperationSubtract);
+  (newEquation->equationHeaders)[2] = (EquationElementHeader *)radicalCopy(b);
+  return (EquationElementHeader *)newEquation;
+}
+EquationElementHeader *constLiteralSubtractVariable(ConstLiteral *a, Variable *b)
+{
+  Equation *newEquation = equationCreate(3);
+  (newEquation->equationHeaders)[0] = (EquationElementHeader *)constLiteralCopy(a);
+  (newEquation->equationHeaders)[1] = (EquationElementHeader *)binaryOperationElementCreate(OperationSubtract);
+  (newEquation->equationHeaders)[2] = (EquationElementHeader *)variableCopy(b);
+  return (EquationElementHeader *)newEquation;
+}
+EquationElementHeader *constLiteralSubtractEquation(ConstLiteral *a, Equation *b)
+{
+  Equation *newEquation = equationCreate(3);
+  (newEquation->equationHeaders)[0] = (EquationElementHeader *)constLiteralCopy(a);
+  (newEquation->equationHeaders)[1] = (EquationElementHeader *)binaryOperationElementCreate(OperationSubtract);
+  (newEquation->equationHeaders)[2] = (EquationElementHeader *)equationCopy(b);
+  return (EquationElementHeader *)newEquation;
+}
 
 EquationElementHeader *fractionSubtractIntegerLiteral(Fraction *a, IntegerLiteral *b);
 EquationElementHeader *fractionSubtractConstLiteral(Fraction *a, ConstLiteral *b);
@@ -612,14 +669,6 @@ EquationElementHeader *equationPowerRadical(Equation *a, Radical *b);
 EquationElementHeader *equationPowerVariable(Equation *a, Variable *b);
 EquationElementHeader *equationPowerEquation(Equation *a, Equation *b);
 
-
-
-EquationElementHeader *integerLiteralSimplify(IntegerLiteral *a);
-EquationElementHeader *constLiteralSimplify(ConstLiteral *a);
-EquationElementHeader *fractionSimplify(Fraction *a);
-EquationElementHeader *radicalSimplify(Radical *a);
-EquationElementHeader *variableSimplify(Variable *a);
-EquationElementHeader *equationSimplify(Equation *a);
 
 
 EquationElementHeader *equationElementHeaderAddEquationElementHeader(EquationElementHeader *a, EquationElementHeader *b)

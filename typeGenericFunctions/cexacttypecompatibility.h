@@ -467,9 +467,24 @@ EquationElementHeader *equationMultiplyEquation(Equation *a, Equation *b)
 
 
 
-EquationElementHeader *integerLiteralSubtractIntegerLiteral(IntegerLiteral *a, IntegerLiteral *b);
-EquationElementHeader *integerLiteralSubtractConstLiteral(IntegerLiteral *a, ConstLiteral *b);
-EquationElementHeader *integerLiteralSubtractFraction(IntegerLiteral *a, Fraction *b);
+EquationElementHeader *integerLiteralSubtractIntegerLiteral(IntegerLiteral *a, IntegerLiteral *b)
+{
+  return (EquationElementHeader *)integerLiteralCreate(a->value - b->value);
+}
+EquationElementHeader *integerLiteralSubtractConstLiteral(IntegerLiteral *a, ConstLiteral *b)
+{
+  Equation *newEquation = equationCreate(3);
+  (newEquation->equationHeaders)[0] = (EquationElementHeader *)integerLiteralCopy(a);
+  (newEquation->equationHeaders)[1] = (EquationElementHeader *)binaryOperationElementCreate(OperationSubtract);
+  (newEquation->equationHeaders)[2] = (EquationElementHeader *)constLiteralCopy(b);
+  return (EquationElementHeader *)newEquation;
+}
+EquationElementHeader *integerLiteralSubtractFraction(IntegerLiteral *a, Fraction *b)
+{
+  EquationElementHeader *newNumerator = equationElementHeaderMultiplyEquationElementHeader((EquationElementHeader *)a, b->denominator);
+  newNumerator = equationElementHeaderSubtractEquationElementHeader(newNumerator, b->numerator);
+  return (EquationElementHeader *)fractionCreate(newNumerator, equationElementHeaderCopy(b->denominator));
+}
 EquationElementHeader *integerLiteralSubtractRadical(IntegerLiteral *a, Radical *b);
 EquationElementHeader *integerLiteralSubtractVariable(IntegerLiteral *a, Variable *b);
 EquationElementHeader *integerLiteralSubtractEquation(IntegerLiteral *a, Equation *b);
